@@ -52,7 +52,7 @@ To run the script please use the following command:
 
 Export the file /tmp/centreon_clapi_import_commands.txt on your CES server.
 
-Run the following commandd to import configuration into Centreon on your CES server:
+Run the following command to import configuration into Centreon on your CES server:
 
     $ /usr/share/centreon/www/modules/centreon-clapi/core/centreon -u admin -p @PASSWORD -i /tmp/centreon_clapi_import_commands.txt
 
