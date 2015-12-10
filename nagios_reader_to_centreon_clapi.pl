@@ -1,25 +1,25 @@
 #!/usr/bin/perl
 #
 # Copyright 2015 Centreon (http://www.centreon.com/)
-# 
-# Centreon is a full-fledged industry-strength solution that meets 
-# the needs in IT infrastructure and application monitoring for 
+#
+# Centreon is a full-fledged industry-strength solution that meets
+# the needs in IT infrastructure and application monitoring for
 # service performance.
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
-# http://www.apache.org/licenses/LICENSE-2.0  
-# 
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# 
+#
 # For more information : contact@centreon.com
-# 
+#
 
 use Getopt::Long;
 use Nagios::Config;
@@ -84,10 +84,10 @@ sub print_usage () {
 }
 
 sub print_help () {
-		print "##############################################\n";
-		print "#    Copyright (c) 2005-2015 Centreon        #\n";
-		print "#    Bugs to http://github.com/centreon      #\n";
-		print "##############################################\n";
+		print "######################################################\n";
+		print "#    Copyright (c) 2005-2015 Centreon                #\n";
+		print "#    Bugs to http://github.com/nagiosToCentreon      #\n";
+		print "######################################################\n";
     	print "\n";
     	print_usage();
     	print "\n";
@@ -337,17 +337,19 @@ sub export_hosts {
 
 			# Add contactgroups to host
 			if ( defined ( $host->contact_groups )  && $host->contact_groups != "" ) {
-				my $contactgroups;
-				foreach my $contactgroup ( @{$host->contact_groups} ) {
-					if ( $contactgroups == "" ) {
-						$contactgroups = $contactgroup->contactgroup_name;
-					} else {
-						$contactgroups .= "|".$contactgroup->contactgroup_name;
+				my $contactgroups_list = "";
+				if ( scalar @{$host->contact_groups} > 1 ) {
+					foreach my $item ( @{$host->contact_groups} ) {
+						$contactgroups_list .= sprintf ( "%s", $item) . "|";
+					}
+					$contactgroups_list =~ s/\|$//;
+					printf ( "%s;setcontactgroup;%s;%s\n", $type, $host_name, $contactgroups_list );
+				} else {
+					foreach my $item ( @{$host->contact_groups} ) {
+						printf ( "%s;addcontactgroup;%s;%s\n", $type, $host_name, $item->contactgroup_name );
 					}
 				}
-				printf ( "%s;addcontactgroup;%s;%s\n", $type, $host_name, $contactgroups );
 			}
-
 			# Add contacts to host
 			if ( defined ( $host->contacts ) && $host->contacts != "" ) {
 				my $contacts;
@@ -624,15 +626,18 @@ sub export_services {
 
 				# Add contactgroups to service
 				if ( defined ( $service->contact_groups )  && $service->contact_groups != "" ) {
-					my $contactgroups;
-					foreach my $contactgroup ( @{$service->contact_groups} ) {
-						if ( $contactgroups == "" ) {
-							$contactgroups = $contactgroup->contactgroup_name;
-						} else {
-							$contactgroups .= "|".$contactgroup->contactgroup_name;
+					my $contactgroups_list;
+					if ( scalar @{$service->contact_groups} > 1 ) {
+						 foreach my $item ( @{$service->contact_groups} ) {
+							$contactgroups_list .= sprintf ( "%s", $item) . "|";
+						}
+						$contactgroups_list =~ s/\|$//;
+						printf ( "%s;setcontactgroup;%s%s;%s\n", $type, $host_name, $service_name, $contactgroups_list );
+					} else {
+						foreach my $item ( @{$service->contact_groups} ) {
+							printf ( "%s;addcontactgroup;%s%s;%s\n", $type, $host_name, $service_name, $item->contactgroup_name );
 						}
 					}
-					printf ( "%s;addcontactgroup;%s%s;%s\n", $type, $host_name, $service_name, $contactgroups );
 				}
 
 				# Add contacts to service
