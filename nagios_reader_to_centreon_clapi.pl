@@ -57,7 +57,7 @@ if ( $OPTION{'help'} ) {
 }
 
 if ( ! -e $OPTION{'config'} ) {
-	printf ( "File %s doesn't existplease specify path with '-C option'\n", $OPTION{'config'} );
+	printf ( "File %s doesn't exist please specify path with '-C option'\n", $OPTION{'config'} );
 	exit $ERRORS{'WARNING'};
 }
 
