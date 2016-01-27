@@ -560,11 +560,11 @@ sub export_services {
 				
 				# Deploy service based on previous template on all host linked to hostgroup
 				foreach my $hostgroup ( @{$service->hostgroup_name} ) {
-						foreach my $host ( @{$hostgroup->members} ) {
-							# If user prefer to keep services by hostgroups
-							if ( defined ( $OPTION{'services_by_hg'} ) ) {
-								printf ( "HGSERVICE;ADD;%s;%s;%s\n", $hostgroup->hostgroup_name, $service->name, $service_name );
-							} else {
+						# If user prefer to keep services by hostgroups
+						if ( defined ( $OPTION{'services_by_hg'} ) ) {
+							printf ( "HGSERVICE;ADD;%s;%s;%s\n", $hostgroup->hostgroup_name, $service->name, $service_name );
+						} else {
+							foreach my $host ( @{$hostgroup->members} ) {
 								printf ( "SERVICE;ADD;%s;%s;%s\n", $host->host_name, $service->name, $service_name );
 							}
 						}
