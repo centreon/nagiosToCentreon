@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-# Copyright 2015 Centreon (http://www.centreon.com/)
+# Copyright 2016 Centreon (http://www.centreon.com/)
 #
 # Centreon is a full-fledged industry-strength solution that meets
 # the needs in IT infrastructure and application monitoring for
@@ -30,8 +30,9 @@ my $VERSION = "1.0";
 my %ERRORS = ( "OK" => 0, "WARNING" => 1, "CRITICAL" => 2, "UNKNOWN" => 3, "PENDING" => 4 );
 
 my %OPTION = ( "help" => undef, 
-			"version" => undef, 
-			"config" => "/usr/local/nagios/etc/nagios.cfg" );
+			   "version" => undef, 
+			   "config" => "/usr/local/nagios/etc/nagios.cfg",
+			   "services_by_hg" => undef );
 
 #############################
 # Control command line args #
@@ -41,7 +42,8 @@ Getopt::Long::Configure('bundling');
 GetOptions(
 	"h|help"		=> \$OPTION{'help'},
     "V|version"		=> \$OPTION{'version'},
-	"C|config=s"	=> \$OPTION{'config'}
+	"C|config=s"	=> \$OPTION{'config'},
+	"S|servcies-hg"	=> \$OPTION{'services_by_hg'}
 );
 
 if ( defined( $OPTION{'version'} ) ) {
@@ -77,15 +79,16 @@ my %serviceTemplates_exported;
 sub print_usage () {
     print "Usage: ";
     print $PROGNAME."\n";
-    print "    -V (--version) Show script version\n";
-    print "    -h (--help)    Usage help\n";
-	print "    -C (--config)  Path to nagios.cfg file\n";
+    print "    -V (--version)     Show script version\n";
+    print "    -h (--help)        Usage help\n";
+	print "    -C (--config)      Path to nagios.cfg file\n";
+	print "    -S (--servcies-hg) To keep services by hostgroups definition\n";
 	print "\n";
 }
 
 sub print_help () {
 		print "######################################################\n";
-		print "#    Copyright (c) 2005-2015 Centreon                #\n";
+		print "#    Copyright (c) 2005-2016 Centreon                #\n";
 		print "#    Bugs to http://github.com/nagiosToCentreon      #\n";
 		print "######################################################\n";
     	print "\n";
@@ -558,7 +561,12 @@ sub export_services {
 				# Deploy service based on previous template on all host linked to hostgroup
 				foreach my $hostgroup ( @{$service->hostgroup_name} ) {
 						foreach my $host ( @{$hostgroup->members} ) {
-							printf ( "SERVICE;ADD;%s;%s;%s\n", $host->host_name, $service->name, $service_name );
+							# If user prefer to keep services by hostgroups
+							if ( defined ( $OPTION{'services_by_hg'} ) ) {
+								printf ( "HGSERVICE;ADD;%s;%s;%s\n", $hostgroup->hostgroup_name, $service->name, $service_name );
+							} else {
+								printf ( "SERVICE;ADD;%s;%s;%s\n", $host->host_name, $service->name, $service_name );
+							}
 						}
 				}
 			} else {
