@@ -40,8 +40,8 @@ my %OPTION = ( "help" => undef,
 
 Getopt::Long::Configure('bundling');
 GetOptions(
-	"h|help"		=> \$OPTION{'help'},
-    "V|version"		=> \$OPTION{'version'},
+	"h|help"	=> \$OPTION{'help'},
+	"V|version"	=> \$OPTION{'version'},
 	"C|config=s"	=> \$OPTION{'config'},
 	"S|servcies-hg"	=> \$OPTION{'services_by_hg'}
 );
@@ -203,7 +203,7 @@ sub export_contacts {
 		printf ( "CONTACT;setparam;%s;comment;%s\n", $contact_name, $contact->comment ) if ( defined ( $contact->comment) );
 
 		# Add contact to contactgroups
-		if ( defined ( $contact->contactgroups ) && defined ( @{$contact->contactgroups} ) ) {
+		if ( defined ( $contact->contactgroups ) && @{$contact->contactgroups} ) {
 			foreach my $contactgroup ( @{$contact->contactgroups} ) {
 				foreach my $contact ( @{$contactgroup->members} ) {
 					$contactgroups{$contactgroup->contactgroup_name}{$contact->contact_name} = 1;
