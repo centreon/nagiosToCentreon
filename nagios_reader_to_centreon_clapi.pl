@@ -24,7 +24,7 @@
 use Getopt::Long;
 use Nagios::Config;
 use Nagios::Object::Config;
-
+use Data::Dumper;
 my $PROGNAME = $0;
 my $VERSION = "1.0";
 my %ERRORS = ( "OK" => 0, "WARNING" => 1, "CRITICAL" => 2, "UNKNOWN" => 3, "PENDING" => 4 );
@@ -704,16 +704,23 @@ sub export_servicegroups {
 	my @servicegroups_array = @_ ;
 
 	foreach my $servicegroup ( @servicegroups_array ) {
-		my %services_exported;
+		my (%services_exported, $host_name, $service_name);
 		if ( $servicegroup->servicegroup_name !~ m/centreon\-bam\-contactgroup|\_Module\_BAM/ ) {
 			printf ( "SG;ADD;%s;%s\n", $servicegroup->servicegroup_name, $servicegroup->alias );
 			printf ( "SG;setparam;%s;sg_activate;1\n", $servicegroup->servicegroup_name );
 			# loop to add services from servicegroups definition
 			if ( defined ( $servicegroup->members ) ) {
-				foreach my $service ( @{$servicegroup->members} ) {
-					if ( !defined ( $services_exported{$service->service_name} ) ) {
-						printf ( "HG;addservice;%s,%s\n", $servicegroup->servicegroup_name, $service->host_name, $service->service_name );
-						$services_exported{$service->service_name} = $service->host_name;
+				foreach my $members ( @{$servicegroup->members} ) {
+					foreach my $element ( @{$members} ) {
+						if ( $element =~/Nagios::Host/ ) {
+							$host_name = $element->host_name;
+						} elsif ( $element =~/Nagios::Service/ ) {
+							$service_name = $element->name;
+						}
+					}
+					if ( !defined ( $services_exported{$host_name."-".$service_name} ) ) {
+						printf ( "SG;addservice;%s;%s,%s\n", $servicegroup->servicegroup_name, $host_name, $service_name );
+						$services_exported{$host_name."-".$service_name} = 1;
 					}
 				}
 			}
@@ -721,7 +728,7 @@ sub export_servicegroups {
 			if ( defined ( $servicegroups{$servicegroup->servicegroup_name} ) ) {
 				foreach my $services ( $servicegroups{$servicegroup->servicegroup_name} ) {
 					foreach my $service ( keys %{$services} ) {
-						if ( !defined ( $services_exported{$service} ) ) {
+						if ( !defined ( $services_exported{$services_exported{$service}."-".$service} ) ) {
 							printf ( "SG;addservice;%s,%s\n", $servicegroup->servicegroup_name, $services_exported{$service}, $service );
 						}
 					}
