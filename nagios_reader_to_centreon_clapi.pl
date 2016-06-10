@@ -476,7 +476,23 @@ sub export_services {
 			export_services ( $objects->find_object( $service->use, "Nagios::Service" ) ) ;
 		}
 		my $host_name;
-				
+		my $is_service_to_export = 0;
+
+		# Check is service has to be exported
+		if ( $serviceTemplates_exported{$service->name} == 0 ) {
+			$is_service_to_export = 1;
+		} else {
+			if ( defined ( $service->host_name ) ) {
+				foreach $host ( @{$service->host_name} ) {
+					$host_name = $host->host_name;
+				}
+				my $host_temp = $objects->find_object( $host_name, "Nagios::Host" );
+				if ( defined ($host_temp->register) || $host_temp->register == 0 ) {
+					$is_service_to_export = 1;
+				}
+			}
+		}
+
 		if ( ( $service->name !~ m/ba\_/ ) && ( $serviceTemplates_exported{$service->name} == 0 ) ) {
 			my $service_name;
 			my $type = "SERVICE";
