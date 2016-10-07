@@ -547,7 +547,14 @@ sub export_services {
 				printf ( "%s;setparam;%s;stalking_options;%s\n", $type, $service_name, 
 					( @{$service->stalking_options()} == 0) ? $service->stalking_options() : join ( ",", @{$service->stalking_options} ) ) if ( defined ( $service->stalking_options ) );
 				printf ( "%s;setparam;%s;failure_prediction_enabled;%s\n", $type,$service_name, $service->failure_prediction_enabled ) if ( defined ( $service->failure_prediction_enabled ) );
-				printf ( "%s;setparam;%s;event_handler;%s\n", $type, $service_name, $service->event_handler ) if ( defined ( $service->event_handler ) ); 
+					if ( defined ( $service->event_handler )){
+						my $var = ref $service->event_handler;
+						if ($var eq "Nagios::Command"){
+							printf ( "%s;setparam;%s;event_handler;%s\n", $type, $service_name, $service->event_handler->name ) ; 
+						} else {
+							printf ( "%s;setparam;%s;event_handler;%s\n", $type, $service_name, $service->event_handler );
+						}
+					}
 				printf ( "%s;setparam;%s;event_handler_enabled;%s\n", $type, $service_name, $service->event_handler_enabled ) if ( defined ( $service->event_handler_enabled ) ); 
 				printf ( "%s;setparam;%s;notes;%s\n", $type, $service_name, $service->notes ) if ( defined ( $service->notes ) ); 	
 				printf ( "%s;setparam;%s;notes_url;%s\n", $type, $service_name, $service->notes_url ) if ( defined ( $service->notes_url ) ); 	
@@ -647,7 +654,14 @@ sub export_services {
 				printf ( "%s;setparam;%s%s;stalking_options;%s\n", $type, $host_name, $service_name, 
 					( @{$service->stalking_options()} == 0) ? $service->stalking_options() : join ( ",", @{$service->stalking_options} ) ) if ( defined ( $service->stalking_options ) );
 				printf ( "%s;setparam;%s%s;failure_prediction_enabled;%s\n", $type, $host_name, $service_name, $service->failure_prediction_enabled ) if ( defined ( $service->failure_prediction_enabled ) );
-				printf ( "%s;setparam;%s%s;event_handler;%s\n", $type, $host_name, $service_name, $service->event_handler ) if ( defined ( $service->event_handler ) ); 
+					if ( defined ( $service->event_handler )){
+						my $var = ref $service->event_handler;
+						if ($var eq "Nagios::Command"){
+							printf ( "%s;setparam;%s%s;event_handler;%s\n", $type, $host_name, $service_name, $service->event_handler->name ) if ( defined ( $service->event_handler ) ); 
+						} else {
+							printf ( "%s;setparam;%s%s;event_handler;%s\n", $type, $host_name, $service_name, $service->event_handler ) if ( defined ( $service->event_handler ) ); 
+						}
+					}
 				printf ( "%s;setparam;%s%s;event_handler_enabled;%s\n", $type, $host_name, $service_name, $service->event_handler_enabled ) if ( defined ( $service->event_handler_enabled ) ); 
 				printf ( "%s;setparam;%s%s;notes;%s\n", $type, $host_name, $service_name, $service->notes ) if ( defined ( $service->notes ) ); 	
 				printf ( "%s;setparam;%s%s;notes_url;%s\n", $type, $host_name, $service_name, $service->notes_url ) if ( defined ( $service->notes_url ) ); 	
