@@ -324,12 +324,12 @@ sub export_hosts {
 				my $parents;
 				foreach my $host ( @{$host->parents} ) {
 					if ( $parents == "" ) {
-						$parents = $host_name;
+						$parents = $host->name;
 					} else {
-						$parents .= "|".$host_name;
+						$parents .= "|".$host->name;
 					}
 				}
-				printf ( "%s;setparam;%s;parents;%s\n", $type, $host_name, $parents );
+				printf ( "%s;addparent;%s;%s\n", $type, $host_name, $parents );
 			}
 			printf ( "%s;setparam;%s;passive_checks_enabled;%s\n", $type, $host_name, $host->passive_checks_enabled ) if ( defined ( $host->passive_checks_enabled ) );
 			printf ( "%s;setparam;%s;process_perf_data;%s\n", $type, $host_name, $host->process_perf_data ) if ( defined ( $host->process_perf_data ) );
