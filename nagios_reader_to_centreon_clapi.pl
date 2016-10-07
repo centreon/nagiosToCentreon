@@ -722,20 +722,22 @@ sub export_serviceextinfo {
 	
 	foreach my $serviceextendedinfo ( @list_serviceextendedinfo ) {
 		my ($host_name, $type);
-		foreach my $host ( @{$serviceextendedinfo->host_name} ) {
-			$host_name = $host->host_name;
-		}
-		if ( defined ( $serviceextendedinfo ) && ( $serviceextendedinfo != 0 ) && defined ( $host_name ) ) {
-			if ( !defined ( ${$serviceextendedinfo->service_description}{'register'} ) || ${$serviceextendedinfo->service_description}{'register'} == 0 ) {
-				$type = "STPL";
-			} else {
-				$type = "SERVICE";
+		if (defined ($serviceextendedinfo->host_name)){
+			foreach my $host ( @{$serviceextendedinfo->host_name} ) {
+				$host_name = $host->host_name;
 			}
-			printf ( "%s;setparam;%s%s;notes;%s\n", $type, $host_name, ${$serviceextendedinfo->service_description}{'service_description'}, $serviceextendedinfo->notes ) if ( defined ( $serviceextendedinfo->notes ) );
-			printf ( "%s;setparam;%s%s;notes_url;%s\n", $type, $host_name, ${$serviceextendedinfo->service_description}{'service_description'}, $serviceextendedinfo->notes_url ) if ( defined ( $serviceextendedinfo->notes_url ) );
-			printf ( "%s;setparam;%s%s;action_url;%s\n", $type, $host_name, ${$serviceextendedinfo->service_description}{'service_description'}, $serviceextendedinfo->action_url ) if ( defined ( $serviceextendedinfo->action_url ) );
-			printf ( "%s;setparam;%s%s;icon_image;%s\n", $type, $host_name, ${$serviceextendedinfo->service_description}{'service_description'}, $serviceextendedinfo->icon_image ) if ( defined ( $serviceextendedinfo->icon_image ) );
-			printf ( "%s;setparam;%s%s;icon_image_alt;%s\n", $type, $host_name, ${$serviceextendedinfo->service_description}{'service_description'}, $serviceextendedinfo->icon_image_alt ) if ( defined ( $serviceextendedinfo->icon_image_alt ) );
+			if ( defined ( $serviceextendedinfo ) && ( $serviceextendedinfo != 0 ) && defined ( $host_name ) ) {
+				if ( !defined ( ${$serviceextendedinfo->service_description}{'register'} ) || ${$serviceextendedinfo->service_description}{'register'} == 0 ) {
+					$type = "STPL";
+				} else {
+					$type = "SERVICE";
+				}
+				printf ( "%s;setparam;%s%s;notes;%s\n", $type, $host_name, ${$serviceextendedinfo->service_description}{'service_description'}, $serviceextendedinfo->notes ) if ( defined ( $serviceextendedinfo->notes ) );
+				printf ( "%s;setparam;%s%s;notes_url;%s\n", $type, $host_name, ${$serviceextendedinfo->service_description}{'service_description'}, $serviceextendedinfo->notes_url ) if ( defined ( $serviceextendedinfo->notes_url ) );
+				printf ( "%s;setparam;%s%s;action_url;%s\n", $type, $host_name, ${$serviceextendedinfo->service_description}{'service_description'}, $serviceextendedinfo->action_url ) if ( defined ( $serviceextendedinfo->action_url ) );
+				printf ( "%s;setparam;%s%s;icon_image;%s\n", $type, $host_name, ${$serviceextendedinfo->service_description}{'service_description'}, $serviceextendedinfo->icon_image ) if ( defined ( $serviceextendedinfo->icon_image ) );
+				printf ( "%s;setparam;%s%s;icon_image_alt;%s\n", $type, $host_name, ${$serviceextendedinfo->service_description}{'service_description'}, $serviceextendedinfo->icon_image_alt ) if ( defined ( $serviceextendedinfo->icon_image_alt ) );
+			}
 		}
 	}
 }
