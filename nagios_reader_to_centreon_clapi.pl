@@ -605,7 +605,7 @@ sub export_services {
 					$host_name .= ";";
 					printf ( "%s;ADD;%s%s;%s\n", $type, $host_name, $service_name, $service->use );
 					#printf ( "%s;setparam;%s%s;template;%s\n", $type, $host_name, $service_name, $service->use ) if ( defined ( $service->use ) );
-					printf ( "%s;setparam;%s%s;description;%s\n", $type, $host_name, $service_name, $service->service_description ) if ( defined ( $service->service_description ) );
+					# printf ( "%s;setparam;%s%s;description;%s\n", $type, $host_name, $service_name, $service->service_description ) if ( defined ( $service->service_description ) );
 				}
 				printf ( "%s;setparam;%s%s;is_volatile;%s\n", $type, $host_name, $service_name, $service->is_volatile ) if ( defined ( $service->is_volatile ) );
 				printf ( "%s;setparam;%s%s;check_period;%s\n", $type, $host_name, $service_name, 
