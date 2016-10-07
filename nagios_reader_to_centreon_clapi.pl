@@ -344,7 +344,12 @@ sub export_hosts {
 				my $contactgroups_list = "";
 				if ( scalar @{$host->contact_groups} > 1 ) {
 					foreach my $item ( @{$host->contact_groups} ) {
-						$contactgroups_list .= sprintf ( "%s", $item) . "|";
+						$item_type = ref $item;
+		                if ($item_type eq "Nagios::ContactGroup"){
+		                    $contactgroups_list .= sprintf ( "%s", $item->name) . "|";
+			            } else {
+			                $contactgroups_list .= sprintf ( "%s", $item) . "|";
+			            }	
 					}
 					$contactgroups_list =~ s/\|$//;
 					printf ( "%s;setcontactgroup;%s;%s\n", $type, $host_name, $contactgroups_list );
@@ -654,7 +659,12 @@ sub export_services {
 					my $contactgroups_list;
 					if ( scalar @{$service->contact_groups} > 1 ) {
 						 foreach my $item ( @{$service->contact_groups} ) {
-							$contactgroups_list .= sprintf ( "%s", $item) . "|";
+						     $item_type = ref $item;
+		                     if ($item_type eq "Nagios::ContactGroup"){
+		                         $contactgroups_list .= sprintf ( "%s", $item->name) . "|";
+			                 } else {
+			                     $contactgroups_list .= sprintf ( "%s", $item) . "|";
+			                 }
 						}
 						$contactgroups_list =~ s/\|$//;
 						printf ( "%s;setcontactgroup;%s%s;%s\n", $type, $host_name, $service_name, $contactgroups_list );
