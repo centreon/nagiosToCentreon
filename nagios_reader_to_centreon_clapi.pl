@@ -150,21 +150,21 @@ sub export_contacts {
 
 		my $contact_name = ( defined ( $contact->contact_name) ? $contact->contact_name : $contact->name );
 		my $contact_alias = ( defined ( $contact->alias) ? $contact->alias : $contact->name );
-		printf ( "CONTACT;ADD;%s;%s;%s;%s;0;0;en_US;local\n", $contact_alias, $contact_name, $contact->email, $contact->pager );
-		printf ( "CONTACT;setparam;%s;hostnotifperiod;%s\n", $contact_name, 
+		printf ( "CONTACT;ADD;%s;%s;%s;%s;0;0;en_US;local\n", $contact_name, $contact_alias, $contact->email, $contact->pager );
+		printf ( "CONTACT;setparam;%s;hostnotifperiod;%s\n", $contact_alias, 
 			( defined ${$contact->host_notification_period}{'timeperiod_name'} ? ${$contact->host_notification_period}{'timeperiod_name'} : $contact->host_notification_period() ) );
-		printf ( "CONTACT;setparam;%s;svcnotifperiod;%s\n", $contact_name, 
+		printf ( "CONTACT;setparam;%s;svcnotifperiod;%s\n", $contact_alias, 
 			( defined ${$contact->service_notification_period}{'timeperiod_name'} ? ${$contact->service_notification_period}{'timeperiod_name'} : $contact->service_notification_period() ) );
-		printf ( "CONTACT;setparam;%s;hostnotifopt;%s\n", $contact_name, 
+		printf ( "CONTACT;setparam;%s;hostnotifopt;%s\n", $contact_alias, 
 			( @{$contact->host_notification_options()} == 0) ? $contact->host_notification_options() : join ( ",", @{$contact->host_notification_options()} ) );
-		printf ( "CONTACT;setparam;%s;servicenotifopt;%s\n", $contact_name, 
+		printf ( "CONTACT;setparam;%s;servicenotifopt;%s\n", $contact_alias, 
 			( @{$contact->service_notification_options()} == 0) ? $contact->service_notification_options() : join ( ",", @{$contact->service_notification_options()} ) );
 		if ( $contact->host_notifications_enabled == 1 || $contact->service_notifications_enabled == 1 ) {
-			printf ( "CONTACT;setparam;%s;contact_enable_notifications;1\n", $contact_name );
+			printf ( "CONTACT;setparam;%s;contact_enable_notifications;1\n", $contact_alias );
 		} else {
-			printf ( "CONTACT;setparam;%s;contact_enable_notifications;0\n", $contact_name );
+			printf ( "CONTACT;setparam;%s;contact_enable_notifications;0\n", $contact_alias );
 		}
-		printf ( "CONTACT;setparam;%s;contact_activate;0\n", $contact_name);
+		printf ( "CONTACT;setparam;%s;contact_activate;0\n", $contact_alias);
 		
 		# Get list of commands
 		my $host_commands_list;
@@ -191,22 +191,22 @@ sub export_contacts {
 				}
 			}
 		}	
-		printf ( "CONTACT;setparam;%s;hostnotifcmd;%s\n", $contact_name, $host_commands_list );
-		printf ( "CONTACT;setparam;%s;svcnotifcmd;%s\n", $contact_name, $service_commands_list );
-		printf ( "CONTACT;setparam;%s;address1;%s\n", $contact_name, $contact->address1 ) if ( defined( $contact->address1 ) );
-		printf ( "CONTACT;setparam;%s;address2;%s\n", $contact_name, $contact->address2 ) if ( defined( $contact->address2 ) );
-		printf ( "CONTACT;setparam;%s;address3;%s\n", $contact_name, $contact->address3 ) if ( defined( $contact->address3 ) );
-		printf ( "CONTACT;setparam;%s;address4;%s\n", $contact_name, $contact->address4 ) if ( defined( $contact->address4 ) );
-		printf ( "CONTACT;setparam;%s;address5;%s\n", $contact_name, $contact->address5 ) if ( defined( $contact->address5 ) );
-		printf ( "CONTACT;setparam;%s;address6;%s\n", $contact_name, $contact->address6 ) if ( defined( $contact->address6 ) );
-		printf ( "CONTACT;setparam;%s;register;%s\n", $contact_name, ( defined ( $contact->register ) ? $contact->register : 0 ) );
-		printf ( "CONTACT;setparam;%s;comment;%s\n", $contact_name, $contact->comment ) if ( defined ( $contact->comment) );
+		printf ( "CONTACT;setparam;%s;hostnotifcmd;%s\n", $contact_alias, $host_commands_list );
+		printf ( "CONTACT;setparam;%s;svcnotifcmd;%s\n", $contact_alias, $service_commands_list );
+		printf ( "CONTACT;setparam;%s;address1;%s\n", $contact_alias, $contact->address1 ) if ( defined( $contact->address1 ) );
+		printf ( "CONTACT;setparam;%s;address2;%s\n", $contact_alias, $contact->address2 ) if ( defined( $contact->address2 ) );
+		printf ( "CONTACT;setparam;%s;address3;%s\n", $contact_alias, $contact->address3 ) if ( defined( $contact->address3 ) );
+		printf ( "CONTACT;setparam;%s;address4;%s\n", $contact_alias, $contact->address4 ) if ( defined( $contact->address4 ) );
+		printf ( "CONTACT;setparam;%s;address5;%s\n", $contact_alias, $contact->address5 ) if ( defined( $contact->address5 ) );
+		printf ( "CONTACT;setparam;%s;address6;%s\n", $contact_alias, $contact->address6 ) if ( defined( $contact->address6 ) );
+		printf ( "CONTACT;setparam;%s;register;%s\n", $contact_alias, ( defined ( $contact->register ) ? $contact->register : 0 ) );
+		printf ( "CONTACT;setparam;%s;comment;%s\n", $contact_alias, $contact->comment ) if ( defined ( $contact->comment) );
 
 		# Add contact to contactgroups
 		if ( defined ( $contact->contactgroups ) && @{$contact->contactgroups} ) {
 			foreach my $contactgroup ( @{$contact->contactgroups} ) {
 				foreach my $contact ( @{$contactgroup->members} ) {
-					$contactgroups{$contactgroup->contactgroup_name}{$contact->contact_name} = 1;
+					$contactgroups{$contactgroup->contactgroup_name}{$contact->alias} = 1;
 				}
 			}
 		}
@@ -228,9 +228,10 @@ sub export_contactgroups {
 			# loop to add contacts from contactgroup definition
 			if ( defined ( $contactgroup->members ) ) {
 				foreach my $contact ( @{$contactgroup->members} ) {
-					if ( !defined ( $contacts_exported{$contact->contact_name} ) ) {
-						printf ( "CG;addcontact;%s;%s\n", $contactgroup->contactgroup_name, $contact->contact_name );
-						$contacts_exported{$contact->contact_name} = 1;
+				    my $contact_alias = ( defined ( $contact->alias) ? $contact->alias : $contact->name );
+					if ( !defined ( $contacts_exported{$contact_alias} ) ) {
+						printf ( "CG;addcontact;%s;%s\n", $contactgroup->contactgroup_name, $contact_alias );
+						$contacts_exported{$contact_alias} = 1;
 					}
 				}
 			}
