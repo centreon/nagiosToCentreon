@@ -500,7 +500,7 @@ sub export_services {
 		# Step through array of host names and set paramaters for each.
 		foreach $host_name ( @host_names ) {
 			# Check is service has to be exported
-			if ( $serviceTemplates_exported{$service->name . $host_name} == 0 ) {
+			if ( $serviceTemplates_exported{$service->name . $host_name . $service->hostgroup_name} == 0 ) {
 				$is_service_to_export = 1;
 			} else {
 				if ( defined ( $service->host_name ) ) {
@@ -514,7 +514,7 @@ sub export_services {
 				}
 			}
 
-			if ( ( $service->name !~ m/ba\_/ ) && ( $serviceTemplates_exported{$service->name . $host_name} == 0 ) ) {
+			if ( ( $service->name !~ m/ba\_/ ) && ( $serviceTemplates_exported{$service->name . $host_name . $service->hostgroup_name} == 0 ) ) {
 				my $service_name;
 				my $type = "SERVICE";
 				if ( defined ( $service->hostgroup_name ) ) {
@@ -730,7 +730,7 @@ sub export_services {
 				
 				}
 			}
-		$serviceTemplates_exported{$service->name . $host_name} = 1;
+		$serviceTemplates_exported{$service->name . $host_name . $service->hostgroup_name} = 1;
 		}
 	}
 }
