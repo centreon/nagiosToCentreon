@@ -150,21 +150,21 @@ sub export_contacts {
 
 		my $contact_name = ( defined ( $contact->contact_name) ? $contact->contact_name : $contact->name );
 		my $contact_alias = ( defined ( $contact->alias) ? $contact->alias : $contact->name );
-		printf ( "CONTACT;ADD;%s;%s;%s;%s;0;0;en_US;local\n", $contact_alias, $contact_name, $contact->email, $contact->pager );
-		printf ( "CONTACT;setparam;%s;hostnotifperiod;%s\n", $contact_name, 
+		printf ( "CONTACT;ADD;%s;%s;%s;%s;0;0;en_US;local\n", $contact_name, $contact_alias, $contact->email, $contact->pager );
+		printf ( "CONTACT;setparam;%s;hostnotifperiod;%s\n", $contact_alias, 
 			( defined ${$contact->host_notification_period}{'timeperiod_name'} ? ${$contact->host_notification_period}{'timeperiod_name'} : $contact->host_notification_period() ) );
-		printf ( "CONTACT;setparam;%s;svcnotifperiod;%s\n", $contact_name, 
+		printf ( "CONTACT;setparam;%s;svcnotifperiod;%s\n", $contact_alias, 
 			( defined ${$contact->service_notification_period}{'timeperiod_name'} ? ${$contact->service_notification_period}{'timeperiod_name'} : $contact->service_notification_period() ) );
-		printf ( "CONTACT;setparam;%s;hostnotifopt;%s\n", $contact_name, 
+		printf ( "CONTACT;setparam;%s;hostnotifopt;%s\n", $contact_alias, 
 			( @{$contact->host_notification_options()} == 0) ? $contact->host_notification_options() : join ( ",", @{$contact->host_notification_options()} ) );
-		printf ( "CONTACT;setparam;%s;servicenotifopt;%s\n", $contact_name, 
+		printf ( "CONTACT;setparam;%s;servicenotifopt;%s\n", $contact_alias, 
 			( @{$contact->service_notification_options()} == 0) ? $contact->service_notification_options() : join ( ",", @{$contact->service_notification_options()} ) );
 		if ( $contact->host_notifications_enabled == 1 || $contact->service_notifications_enabled == 1 ) {
-			printf ( "CONTACT;setparam;%s;contact_enable_notifications;1\n", $contact_name );
+			printf ( "CONTACT;setparam;%s;contact_enable_notifications;1\n", $contact_alias );
 		} else {
-			printf ( "CONTACT;setparam;%s;contact_enable_notifications;0\n", $contact_name );
+			printf ( "CONTACT;setparam;%s;contact_enable_notifications;0\n", $contact_alias );
 		}
-		printf ( "CONTACT;setparam;%s;contact_activate;0\n", $contact_name);
+		printf ( "CONTACT;setparam;%s;contact_activate;0\n", $contact_alias);
 		
 		# Get list of commands
 		my $host_commands_list;
@@ -191,22 +191,22 @@ sub export_contacts {
 				}
 			}
 		}	
-		printf ( "CONTACT;setparam;%s;hostnotifcmd;%s\n", $contact_name, $host_commands_list );
-		printf ( "CONTACT;setparam;%s;svcnotifcmd;%s\n", $contact_name, $service_commands_list );
-		printf ( "CONTACT;setparam;%s;address1;%s\n", $contact_name, $contact->address1 ) if ( defined( $contact->address1 ) );
-		printf ( "CONTACT;setparam;%s;address2;%s\n", $contact_name, $contact->address2 ) if ( defined( $contact->address2 ) );
-		printf ( "CONTACT;setparam;%s;address3;%s\n", $contact_name, $contact->address3 ) if ( defined( $contact->address3 ) );
-		printf ( "CONTACT;setparam;%s;address4;%s\n", $contact_name, $contact->address4 ) if ( defined( $contact->address4 ) );
-		printf ( "CONTACT;setparam;%s;address5;%s\n", $contact_name, $contact->address5 ) if ( defined( $contact->address5 ) );
-		printf ( "CONTACT;setparam;%s;address6;%s\n", $contact_name, $contact->address6 ) if ( defined( $contact->address6 ) );
-		printf ( "CONTACT;setparam;%s;register;%s\n", $contact_name, ( defined ( $contact->register ) ? $contact->register : 0 ) );
-		printf ( "CONTACT;setparam;%s;comment;%s\n", $contact_name, $contact->comment ) if ( defined ( $contact->comment) );
+		printf ( "CONTACT;setparam;%s;hostnotifcmd;%s\n", $contact_alias, $host_commands_list );
+		printf ( "CONTACT;setparam;%s;svcnotifcmd;%s\n", $contact_alias, $service_commands_list );
+		printf ( "CONTACT;setparam;%s;address1;%s\n", $contact_alias, $contact->address1 ) if ( defined( $contact->address1 ) );
+		printf ( "CONTACT;setparam;%s;address2;%s\n", $contact_alias, $contact->address2 ) if ( defined( $contact->address2 ) );
+		printf ( "CONTACT;setparam;%s;address3;%s\n", $contact_alias, $contact->address3 ) if ( defined( $contact->address3 ) );
+		printf ( "CONTACT;setparam;%s;address4;%s\n", $contact_alias, $contact->address4 ) if ( defined( $contact->address4 ) );
+		printf ( "CONTACT;setparam;%s;address5;%s\n", $contact_alias, $contact->address5 ) if ( defined( $contact->address5 ) );
+		printf ( "CONTACT;setparam;%s;address6;%s\n", $contact_alias, $contact->address6 ) if ( defined( $contact->address6 ) );
+		printf ( "CONTACT;setparam;%s;register;%s\n", $contact_alias, ( defined ( $contact->register ) ? $contact->register : 0 ) );
+		printf ( "CONTACT;setparam;%s;comment;%s\n", $contact_alias, $contact->comment ) if ( defined ( $contact->comment) );
 
 		# Add contact to contactgroups
 		if ( defined ( $contact->contactgroups ) && @{$contact->contactgroups} ) {
 			foreach my $contactgroup ( @{$contact->contactgroups} ) {
 				foreach my $contact ( @{$contactgroup->members} ) {
-					$contactgroups{$contactgroup->contactgroup_name}{$contact->contact_name} = 1;
+					$contactgroups{$contactgroup->contactgroup_name}{$contact->alias} = 1;
 				}
 			}
 		}
@@ -228,9 +228,10 @@ sub export_contactgroups {
 			# loop to add contacts from contactgroup definition
 			if ( defined ( $contactgroup->members ) ) {
 				foreach my $contact ( @{$contactgroup->members} ) {
-					if ( !defined ( $contacts_exported{$contact->contact_name} ) ) {
-						printf ( "CG;addcontact;%s;%s\n", $contactgroup->contactgroup_name, $contact->contact_name );
-						$contacts_exported{$contact->contact_name} = 1;
+				    my $contact_alias = ( defined ( $contact->alias) ? $contact->alias : $contact->name );
+					if ( !defined ( $contacts_exported{$contact_alias} ) ) {
+						printf ( "CG;addcontact;%s;%s\n", $contactgroup->contactgroup_name, $contact_alias );
+						$contacts_exported{$contact_alias} = 1;
 					}
 				}
 			}
@@ -323,12 +324,12 @@ sub export_hosts {
 				my $parents;
 				foreach my $host ( @{$host->parents} ) {
 					if ( $parents == "" ) {
-						$parents = $host_name;
+						$parents = $host->name;
 					} else {
-						$parents .= "|".$host_name;
+						$parents .= "|".$host->name;
 					}
 				}
-				printf ( "%s;setparam;%s;parents;%s\n", $type, $host_name, $parents );
+				printf ( "%s;addparent;%s;%s\n", $type, $host_name, $parents );
 			}
 			printf ( "%s;setparam;%s;passive_checks_enabled;%s\n", $type, $host_name, $host->passive_checks_enabled ) if ( defined ( $host->passive_checks_enabled ) );
 			printf ( "%s;setparam;%s;process_perf_data;%s\n", $type, $host_name, $host->process_perf_data ) if ( defined ( $host->process_perf_data ) );
@@ -343,7 +344,12 @@ sub export_hosts {
 				my $contactgroups_list = "";
 				if ( scalar @{$host->contact_groups} > 1 ) {
 					foreach my $item ( @{$host->contact_groups} ) {
-						$contactgroups_list .= sprintf ( "%s", $item) . "|";
+						$item_type = ref $item;
+		                if ($item_type eq "Nagios::ContactGroup"){
+		                    $contactgroups_list .= sprintf ( "%s", $item->name) . "|";
+			            } else {
+			                $contactgroups_list .= sprintf ( "%s", $item) . "|";
+			            }	
 					}
 					$contactgroups_list =~ s/\|$//;
 					printf ( "%s;setcontactgroup;%s;%s\n", $type, $host_name, $contactgroups_list );
@@ -471,223 +477,261 @@ sub export_hostdependencies {
 # Export Nagios services and templates of services using Centreon CLAPI format
 sub export_services {
 	my @services_array = @_;
+	
+	# Create an array to hold host names.
+	my @host_names;
+	
 	foreach my $service ( @services_array ) {
 		if ( defined ( $service->use ) ) {
 			export_services ( $objects->find_object( $service->use, "Nagios::Service" ) ) ;
 		}
 		my $host_name;
 		my $is_service_to_export = 0;
-
-		# Check is service has to be exported
-		if ( $serviceTemplates_exported{$service->name} == 0 ) {
-			$is_service_to_export = 1;
-		} else {
-			if ( defined ( $service->host_name ) ) {
-				foreach $host ( @{$service->host_name} ) {
-					$host_name = $host->host_name;
-				}
-				my $host_temp = $objects->find_object( $host_name, "Nagios::Host" );
-				if ( defined ($host_temp->register) || $host_temp->register == 0 ) {
-					$is_service_to_export = 1;
-				}
+		@host_names = ();
+		
+		if ( defined ( $service->host_name ) ) {
+			foreach $host ( @{$service->host_name} ) {
+				# Push the host names into array.
+				push(@host_names, $host->host_name);
 			}
+		} else {
+			push(@host_names, $host_name);
 		}
-
-		if ( ( $service->name !~ m/ba\_/ ) && ( $serviceTemplates_exported{$service->name} == 0 ) ) {
-			my $service_name;
-			my $type = "SERVICE";
-			if ( defined ( $service->hostgroup_name ) ) {
-				# Create template of service
-				$type = "STPL";
-				$service_name = "from_service_by_hg_".$service->name;
-				printf ( "%s;ADD;%s;%s;%s\n", $type, $service_name, ( defined ( $service->service_description ) ? $service->service_description : $service_name ), $service->use );
-				printf ( "%s;setparam;%s;is_volatile;%s\n", $type, $service_name, $service->is_volatile ) if ( defined ( $service->is_volatile ) );
-				printf ( "%s;setparam;%s;check_period;%s\n", $type, $service_name, 
-					( defined ${$service->check_period}{'timeperiod_name'} ? ${$service->check_period}{'timeperiod_name'} : $service->check_period ) ) if ( defined ( $service->check_period ) );
-				my ($check_command, $check_command_arguments);
-				if ( defined ( $service->check_command ) ) {
-					$check_command = ( defined ( ${$service->check_command}{'command_name'} ) ? ${$service->check_command}{'command_name'} : $service->check_command );
-					($check_command, $check_command_arguments) = split ( '!', $check_command, 2 ) ;
-					printf ( "%s;setparam;%s;check_command;%s\n", $type, $service_name, $check_command )  if ( $check_command !~ m/^\$/ );
-					printf ( "%s;setparam;%s;check_command_arguments;!%s\n", $type, $service_name, $check_command_arguments )  if ( defined ( $check_command_arguments ) );
-				}
-				# Not available in Centreon CLAPI v1.8
-				#printf ( "%s;setparam;%s;initial_state;%s\n", $type, $service_name, 
-				#	( @{$service->initial_state()} == 0 ) ? $service->initial_state() : join ( ",", @{$service->initial_state} ) ) if ( defined ( $service->initial_state ) );
-				printf ( "%s;setparam;%s;max_check_attempts;%s\n", $type, $service_name, $service->max_check_attempts ) if ( defined ( $service->max_check_attempts ) );
-				printf ( "%s;setparam;%s;normal_check_interval;%s\n", $type, $service_name, $service->check_interval ) if ( defined ( $service->check_interval ) );
-				printf ( "%s;setparam;%s;retry_check_interval;%s\n", $type, $service_name, $service->retry_interval ) if ( defined ( $service->retry_interval ) );
-				printf ( "%s;setparam;%s;active_checks_enabled;%s\n", $type, $service_name, $service->active_checks_enabled ) if ( defined ( $service->active_checks_enabled ) );
-				printf ( "%s;setparam;%s;passive_checks_enabled;%s\n", $type, $service_name, $service->passive_checks_enabled ) if ( defined ( $service->passive_checks_enabled ) );
-				printf ( "%s;setparam;%s;notifications_enabled;%s\n", $type, $service_name, $service->notifications_enabled ) if ( defined ( $service->notifications_enabled ) );
-				printf ( "%s;setparam;%s;notification_interval;%s\n", $type, $service_name, $service->notification_interval ) if ( defined ( $service->notification_interval ) );
-				printf ( "%s;setparam;%s;notification_period;%s\n", $type, $service_name, 
-					( defined ${$service->notification_period}{'timeperiod_name'} ? ${$service->notification_period}{'timeperiod_name'} : $service->notification_period ) ) if ( defined ( $service->notification_period ) );
-				printf ( "%s;setparam;%s;notification_options;%s\n", $type, $service_name, 
-					( @{$service->notification_options()} == 0 ) ? $service->notification_options() : join ( ",", @{$service->notification_options} ) ) if ( defined ( $service->notification_options ) );
-				printf ( "%s;setparam;%s;first_notification_delay;%s\n", $type, $service_name, $service->first_notification_delay ) if ( defined ( $service->first_notification_delay ) ); 
-				printf ( "%s;setparam;%s;parallelize_check;%s\n", $type, $service_name, $service->parallelize_check ) if ( defined ( $service->parallelize_check ) ); 
-				printf ( "%s;setparam;%s;obsess_over_service;%s\n", $type, $service_name, $service->obsess_over_service ) if ( defined ( $service->obsess_over_service ) ); 
-				printf ( "%s;setparam;%s;check_freshness;%s\n", $type, $service_name, $service->check_freshness ) if ( defined ( $service->check_freshness ) ); 
-				printf ( "%s;setparam;%s;freshness_threshold;%s\n", $type, $service_name, $service->freshness_threshold ) if ( defined ( $service->freshness_threshold ) ); 
-				printf ( "%s;setparam;%s;flap_detection_enabled;%s\n", $type, $service_name, $service->flap_detection_enabled ) if ( defined ( $service->flap_detection_enabled ) ); 
-				printf ( "%s;setparam;%s;flap_detection_options;%s\n", $type, $service_name, 
-					( @{$service->flap_detection_options()} == 0) ? $service->flap_detection_options() : join ( ",", @{$service->flap_detection_options} ) ) if ( defined ( $service->flap_detection_options ) );
-				printf ( "%s;setparam;%s;low_flap_threshold;%s\n", $type, $service_name, $service->low_flap_threshold ) if ( defined ( $service->low_flap_threshold ) ); 
-				printf ( "%s;setparam;%s;high_flap_threshold;%s\n", $type, $service_name, $service->high_flap_threshold ) if ( defined ( $service->high_flap_threshold ) ); 
-				printf ( "%s;setparam;%s;process_perf_data;%s\n", $type, $service_name, $service->process_perf_data ) if ( defined ( $service->process_perf_data ) ); 
-				printf ( "%s;setparam;%s;retain_status_information;%s\n", $type, $service_name, $service->retain_status_information ) if ( defined ( $service->retain_status_information ) ); 
-				printf ( "%s;setparam;%s;retain_nonstatus_information;%s\n", $type, $service_name, $service->retain_nonstatus_information ) if ( defined ( $service->retain_nonstatus_information ) ); 
-				printf ( "%s;setparam;%s;stalking_options;%s\n", $type, $service_name, 
-					( @{$service->stalking_options()} == 0) ? $service->stalking_options() : join ( ",", @{$service->stalking_options} ) ) if ( defined ( $service->stalking_options ) );
-				printf ( "%s;setparam;%s;failure_prediction_enabled;%s\n", $type,$service_name, $service->failure_prediction_enabled ) if ( defined ( $service->failure_prediction_enabled ) );
-				printf ( "%s;setparam;%s;event_handler;%s\n", $type, $service_name, $service->event_handler ) if ( defined ( $service->event_handler ) ); 
-				printf ( "%s;setparam;%s;event_handler_enabled;%s\n", $type, $service_name, $service->event_handler_enabled ) if ( defined ( $service->event_handler_enabled ) ); 
-				printf ( "%s;setparam;%s;notes;%s\n", $type, $service_name, $service->notes ) if ( defined ( $service->notes ) ); 	
-				printf ( "%s;setparam;%s;notes_url;%s\n", $type, $service_name, $service->notes_url ) if ( defined ( $service->notes_url ) ); 	
-				printf ( "%s;setparam;%s;action_url;%s\n", $type, $service_name, $service->action_url ) if ( defined ( $service->action_url ) ); 	
-				printf ( "%s;setparam;%s;comment;%s\n", $type, $service_name, $service->comment ) if ( defined ( $service->comment ) ); 
-
-				# Add contactgroups to service
-				if ( defined ( $service->contact_groups )  && $service->contact_groups != "" ) {
-					my $contactgroups;
-					foreach my $contactgroup ( @{$service->contact_groups} ) {
-						if ( $contactgroups == "" ) {
-							$contactgroups = $contactgroup->contactgroup_name;
-						} else {
-							$contactgroups .= "|".$contactgroup->contactgroup_name;
-						}
-					}
-					printf ( "%s;addcontactgroup;%s%s;%s\n", $type, $host_name, $service_name, $contactgroups );
-				}
-
-				# Add contacts to service
-				if ( defined ( $service->contacts ) && $service->contacts != "" ) {
-					my $contacts;
-					foreach my $contact ( @{$service->contacts} ) {
-						if ( $contacts == "" ) {
-							$contacts = $contact->name;
-						} else {
-							$contacts .= "|".$contact->name;
-						}
-					}
-					printf ( "%s;addcontact;%s%s;%s\n", $type, $host_name, $service_name, $contacts );
-				}
-				
-				# Deploy service based on previous template on all host linked to hostgroup
-				foreach my $hostgroup ( @{$service->hostgroup_name} ) {
-						# If user prefer to keep services by hostgroups
-						if ( defined ( $OPTION{'services_by_hg'} ) ) {
-							printf ( "HGSERVICE;ADD;%s;%s;%s\n", $hostgroup->hostgroup_name, $service->name, $service_name );
-						} else {
-							foreach my $host ( @{$hostgroup->members} ) {
-								printf ( "SERVICE;ADD;%s;%s;%s\n", $host->host_name, $service->name, $service_name );
-							}
-						}
-				}
+		# Step through array of host names and set paramaters for each.
+		foreach $host_name ( @host_names ) {
+			# Check is service has to be exported
+			if ( $serviceTemplates_exported{$service->name . $host_name . $service->hostgroup_name} == 0 ) {
+				$is_service_to_export = 1;
 			} else {
-				if ( !defined ( $service->register ) || $service->register == 0 ) {
-					$type = "STPL";
-					$service_name = $service->name;
-					printf ( "STPL;ADD;%s;%s;%s\n", $service_name, ( defined ( $service->service_description ) ? $service->service_description : $service_name ), $service->use );
-				} else {
-					$type = "SERVICE";
-					$service_name = $service->name;
+				if ( defined ( $service->host_name ) ) {
 					foreach $host ( @{$service->host_name} ) {
 						$host_name = $host->host_name;
 					}
-					$host_name .= ";";
-					printf ( "%s;ADD;%s%s;%s\n", $type, $host_name, $service_name, $service->use );
-					#printf ( "%s;setparam;%s%s;template;%s\n", $type, $host_name, $service_name, $service->use ) if ( defined ( $service->use ) );
-					printf ( "%s;setparam;%s%s;description;%s\n", $type, $host_name, $service_name, $service->service_description ) if ( defined ( $service->service_description ) );
-				}
-				printf ( "%s;setparam;%s%s;is_volatile;%s\n", $type, $host_name, $service_name, $service->is_volatile ) if ( defined ( $service->is_volatile ) );
-				printf ( "%s;setparam;%s%s;check_period;%s\n", $type, $host_name, $service_name, 
-					( defined ${$service->check_period}{'timeperiod_name'} ? ${$service->check_period}{'timeperiod_name'} : $service->check_period ) ) if ( defined ( $service->check_period ) );
-				my ($check_command, $check_command_arguments);
-				if ( defined ( $service->check_command ) ) {
-					$check_command = ( defined ( ${$service->check_command}{'command_name'} ) ? ${$service->check_command}{'command_name'} : $service->check_command );
-					($check_command, $check_command_arguments) = split ( '!', $check_command, 2 ) ;
-					printf ( "%s;setparam;%s%s;check_command;%s\n", $type, $host_name, $service_name, $check_command )  if ( $check_command !~ m/^\$/ );
-					printf ( "%s;setparam;%s%s;check_command_arguments;!%s\n", $type, $host_name, $service_name, $check_command_arguments )  if ( defined ( $check_command_arguments ) );
-				}
-				# Not available in Centreon CLAPI v1.8
-				#printf ( "%s;setparam;%s%s;initial_state;%s\n", $type, $host_name, $service_name, 
-				#	( @{$service->initial_state()} == 0 ) ? $service->initial_state() : join ( ",", @{$service->initial_state} ) ) if ( defined ( $service->initial_state ) );
-				printf ( "%s;setparam;%s%s;max_check_attempts;%s\n", $type, $host_name, $service_name, $service->max_check_attempts ) if ( defined ( $service->max_check_attempts ) );
-				printf ( "%s;setparam;%s%s;normal_check_interval;%s\n", $type, $host_name, $service_name, $service->check_interval ) if ( defined ( $service->check_interval ) );
-				printf ( "%s;setparam;%s%s;retry_check_interval;%s\n", $type, $host_name, $service_name, $service->retry_interval ) if ( defined ( $service->retry_interval ) );
-				printf ( "%s;setparam;%s%s;active_checks_enabled;%s\n", $type, $host_name, $service_name, $service->active_checks_enabled ) if ( defined ( $service->active_checks_enabled ) );
-				printf ( "%s;setparam;%s%s;passive_checks_enabled;%s\n", $type, $host_name, $service_name, $service->passive_checks_enabled ) if ( defined ( $service->passive_checks_enabled ) );
-				printf ( "%s;setparam;%s%s;notifications_enabled;%s\n", $type, $host_name, $service_name, $service->notifications_enabled ) if ( defined ( $service->notifications_enabled ) );
-				printf ( "%s;setparam;%s%s;notification_interval;%s\n", $type, $host_name, $service_name, $service->notification_interval ) if ( defined ( $service->notification_interval ) );
-				printf ( "%s;setparam;%s%s;notification_period;%s\n", $type, $host_name, $service_name, 
-					( defined ${$service->notification_period}{'timeperiod_name'} ? ${$service->notification_period}{'timeperiod_name'} : $service->notification_period ) ) if ( defined ( $service->notification_period ) );
-				printf ( "%s;setparam;%s%s;notification_options;%s\n", $type, $host_name, $service_name, 
-					( @{$service->notification_options()} == 0 ) ? $service->notification_options() : join ( ",", @{$service->notification_options} ) ) if ( defined ( $service->notification_options ) );
-				printf ( "%s;setparam;%s%s;first_notification_delay;%s\n", $type, $host_name, $service_name, $service->first_notification_delay ) if ( defined ( $service->first_notification_delay ) ); 
-				printf ( "%s;setparam;%s%s;parallelize_check;%s\n", $type, $host_name, $service_name, $service->parallelize_check ) if ( defined ( $service->parallelize_check ) ); 
-				printf ( "%s;setparam;%s%s;obsess_over_service;%s\n", $type, $host_name, $service_name, $service->obsess_over_service ) if ( defined ( $service->obsess_over_service ) ); 
-				printf ( "%s;setparam;%s%s;check_freshness;%s\n", $type, $host_name, $service_name, $service->check_freshness ) if ( defined ( $service->check_freshness ) ); 
-				printf ( "%s;setparam;%s%s;freshness_threshold;%s\n", $type, $host_name, $service_name, $service->freshness_threshold ) if ( defined ( $service->freshness_threshold ) ); 
-				printf ( "%s;setparam;%s%s;flap_detection_enabled;%s\n", $type, $host_name, $service_name, $service->flap_detection_enabled ) if ( defined ( $service->flap_detection_enabled ) ); 
-				printf ( "%s;setparam;%s%s;flap_detection_options;%s\n", $type, $host_name, $service_name, 
-					( @{$service->flap_detection_options()} == 0) ? $service->flap_detection_options() : join ( ",", @{$service->flap_detection_options} ) ) if ( defined ( $service->flap_detection_options ) );
-				printf ( "%s;setparam;%s%s;low_flap_threshold;%s\n", $type, $host_name, $service_name, $service->low_flap_threshold ) if ( defined ( $service->low_flap_threshold ) ); 
-				printf ( "%s;setparam;%s%s;high_flap_threshold;%s\n", $type, $host_name, $service_name, $service->high_flap_threshold ) if ( defined ( $service->high_flap_threshold ) ); 
-				printf ( "%s;setparam;%s%s;process_perf_data;%s\n", $type, $host_name, $service_name, $service->process_perf_data ) if ( defined ( $service->process_perf_data ) ); 
-				printf ( "%s;setparam;%s%s;retain_status_information;%s\n", $type, $host_name, $service_name, $service->retain_status_information ) if ( defined ( $service->retain_status_information ) ); 
-				printf ( "%s;setparam;%s%s;retain_nonstatus_information;%s\n", $type, $host_name, $service_name, $service->retain_nonstatus_information ) if ( defined ( $service->retain_nonstatus_information ) ); 
-				printf ( "%s;setparam;%s%s;stalking_options;%s\n", $type, $host_name, $service_name, 
-					( @{$service->stalking_options()} == 0) ? $service->stalking_options() : join ( ",", @{$service->stalking_options} ) ) if ( defined ( $service->stalking_options ) );
-				printf ( "%s;setparam;%s%s;failure_prediction_enabled;%s\n", $type, $host_name, $service_name, $service->failure_prediction_enabled ) if ( defined ( $service->failure_prediction_enabled ) );
-				printf ( "%s;setparam;%s%s;event_handler;%s\n", $type, $host_name, $service_name, $service->event_handler ) if ( defined ( $service->event_handler ) ); 
-				printf ( "%s;setparam;%s%s;event_handler_enabled;%s\n", $type, $host_name, $service_name, $service->event_handler_enabled ) if ( defined ( $service->event_handler_enabled ) ); 
-				printf ( "%s;setparam;%s%s;notes;%s\n", $type, $host_name, $service_name, $service->notes ) if ( defined ( $service->notes ) ); 	
-				printf ( "%s;setparam;%s%s;notes_url;%s\n", $type, $host_name, $service_name, $service->notes_url ) if ( defined ( $service->notes_url ) ); 	
-				printf ( "%s;setparam;%s%s;action_url;%s\n", $type, $host_name, $service_name, $service->action_url ) if ( defined ( $service->action_url ) ); 	
-				printf ( "%s;setparam;%s%s;comment;%s\n", $type, $host_name, $service_name, $service->comment ) if ( defined ( $service->comment ) ); 
-
-				# Add contactgroups to service
-				if ( defined ( $service->contact_groups )  && $service->contact_groups != "" ) {
-					my $contactgroups_list;
-					if ( scalar @{$service->contact_groups} > 1 ) {
-						 foreach my $item ( @{$service->contact_groups} ) {
-							$contactgroups_list .= sprintf ( "%s", $item) . "|";
-						}
-						$contactgroups_list =~ s/\|$//;
-						printf ( "%s;setcontactgroup;%s%s;%s\n", $type, $host_name, $service_name, $contactgroups_list );
-					} else {
-						foreach my $item ( @{$service->contact_groups} ) {
-							printf ( "%s;addcontactgroup;%s%s;%s\n", $type, $host_name, $service_name, $item->contactgroup_name );
-						}
-					}
-				}
-
-				# Add contacts to service
-				if ( defined ( $service->contacts ) && $service->contacts != "" ) {
-					my $contacts;
-					foreach my $contact ( @{$service->contacts} ) {
-						if ( $contacts == "" ) {
-							$contacts = $contact->name;
-						} else {
-							$contacts .= "|".$contact->name;
-						}
-					}
-					printf ( "%s;addcontact;%s%s;%s\n", $type, $host_name, $service_name, $contacts );
-				}
-
-				# Add service to servicegroups
-				if (defined ( $service->servicegroups ) ) {
-					foreach my $servicegroup ( @{$service->servicegroups} ) {
-						foreach my $service ( @{$servicegroup->members} ) {
-							$servicegroups{$servicegroup->servicegroup_name}{$service->name} = $service->host_name;
-						}
+					my $host_temp = $objects->find_object( $host_name, "Nagios::Host" );
+					if ( defined ($host_temp->register) || $host_temp->register == 0 ) {
+						$is_service_to_export = 1;
 					}
 				}
 			}
+		    # Assuming that BA Monitoring service names start with ba_. 
+			if ( ( $service->name !~ m/^ba\_/ ) && ( $serviceTemplates_exported{$service->name . $host_name . $service->hostgroup_name} == 0 ) ) {
+				my $service_name;
+				my $type = "SERVICE";
+				if ( defined ( $service->hostgroup_name ) ) {
+					# Create template of service
+					$type = "STPL";
+					$service_name = "from_service_by_hg_".$service->name;
+					printf ( "%s;ADD;%s;%s;%s\n", $type, $service_name, ( defined ( $service->service_description ) ? $service->service_description : $service_name ), $service->use );
+					printf ( "%s;setparam;%s;is_volatile;%s\n", $type, $service_name, $service->is_volatile ) if ( defined ( $service->is_volatile ) );
+					printf ( "%s;setparam;%s;check_period;%s\n", $type, $service_name, 
+						( defined ${$service->check_period}{'timeperiod_name'} ? ${$service->check_period}{'timeperiod_name'} : $service->check_period ) ) if ( defined ( $service->check_period ) );
+					my ($check_command, $check_command_arguments);
+					if ( defined ( $service->check_command ) ) {
+						$check_command = ( defined ( ${$service->check_command}{'command_name'} ) ? ${$service->check_command}{'command_name'} : $service->check_command );
+						($check_command, $check_command_arguments) = split ( '!', $check_command, 2 ) ;
+						printf ( "%s;setparam;%s;check_command;%s\n", $type, $service_name, $check_command )  if ( $check_command !~ m/^\$/ );
+						printf ( "%s;setparam;%s;check_command_arguments;!%s\n", $type, $service_name, $check_command_arguments )  if ( defined ( $check_command_arguments ) );
+					}
+					# Not available in Centreon CLAPI v1.8
+					#printf ( "%s;setparam;%s;initial_state;%s\n", $type, $service_name, 
+					#	( @{$service->initial_state()} == 0 ) ? $service->initial_state() : join ( ",", @{$service->initial_state} ) ) if ( defined ( $service->initial_state ) );
+					printf ( "%s;setparam;%s;max_check_attempts;%s\n", $type, $service_name, $service->max_check_attempts ) if ( defined ( $service->max_check_attempts ) );
+					printf ( "%s;setparam;%s;normal_check_interval;%s\n", $type, $service_name, $service->check_interval ) if ( defined ( $service->check_interval ) );
+					printf ( "%s;setparam;%s;retry_check_interval;%s\n", $type, $service_name, $service->retry_interval ) if ( defined ( $service->retry_interval ) );
+					printf ( "%s;setparam;%s;active_checks_enabled;%s\n", $type, $service_name, $service->active_checks_enabled ) if ( defined ( $service->active_checks_enabled ) );
+					printf ( "%s;setparam;%s;passive_checks_enabled;%s\n", $type, $service_name, $service->passive_checks_enabled ) if ( defined ( $service->passive_checks_enabled ) );
+					printf ( "%s;setparam;%s;notifications_enabled;%s\n", $type, $service_name, $service->notifications_enabled ) if ( defined ( $service->notifications_enabled ) );
+					printf ( "%s;setparam;%s;notification_interval;%s\n", $type, $service_name, $service->notification_interval ) if ( defined ( $service->notification_interval ) );
+					printf ( "%s;setparam;%s;notification_period;%s\n", $type, $service_name, 
+						( defined ${$service->notification_period}{'timeperiod_name'} ? ${$service->notification_period}{'timeperiod_name'} : $service->notification_period ) ) if ( defined ( $service->notification_period ) );
+					printf ( "%s;setparam;%s;notification_options;%s\n", $type, $service_name, 
+						( @{$service->notification_options()} == 0 ) ? $service->notification_options() : join ( ",", @{$service->notification_options} ) ) if ( defined ( $service->notification_options ) );
+					printf ( "%s;setparam;%s;first_notification_delay;%s\n", $type, $service_name, $service->first_notification_delay ) if ( defined ( $service->first_notification_delay ) ); 
+					printf ( "%s;setparam;%s;parallelize_check;%s\n", $type, $service_name, $service->parallelize_check ) if ( defined ( $service->parallelize_check ) ); 
+					printf ( "%s;setparam;%s;obsess_over_service;%s\n", $type, $service_name, $service->obsess_over_service ) if ( defined ( $service->obsess_over_service ) ); 
+					printf ( "%s;setparam;%s;check_freshness;%s\n", $type, $service_name, $service->check_freshness ) if ( defined ( $service->check_freshness ) ); 
+					printf ( "%s;setparam;%s;freshness_threshold;%s\n", $type, $service_name, $service->freshness_threshold ) if ( defined ( $service->freshness_threshold ) ); 
+					printf ( "%s;setparam;%s;flap_detection_enabled;%s\n", $type, $service_name, $service->flap_detection_enabled ) if ( defined ( $service->flap_detection_enabled ) ); 
+					printf ( "%s;setparam;%s;flap_detection_options;%s\n", $type, $service_name, 
+						( @{$service->flap_detection_options()} == 0) ? $service->flap_detection_options() : join ( ",", @{$service->flap_detection_options} ) ) if ( defined ( $service->flap_detection_options ) );
+					printf ( "%s;setparam;%s;low_flap_threshold;%s\n", $type, $service_name, $service->low_flap_threshold ) if ( defined ( $service->low_flap_threshold ) ); 
+					printf ( "%s;setparam;%s;high_flap_threshold;%s\n", $type, $service_name, $service->high_flap_threshold ) if ( defined ( $service->high_flap_threshold ) ); 
+					printf ( "%s;setparam;%s;process_perf_data;%s\n", $type, $service_name, $service->process_perf_data ) if ( defined ( $service->process_perf_data ) ); 
+					printf ( "%s;setparam;%s;retain_status_information;%s\n", $type, $service_name, $service->retain_status_information ) if ( defined ( $service->retain_status_information ) ); 
+					printf ( "%s;setparam;%s;retain_nonstatus_information;%s\n", $type, $service_name, $service->retain_nonstatus_information ) if ( defined ( $service->retain_nonstatus_information ) ); 
+					printf ( "%s;setparam;%s;stalking_options;%s\n", $type, $service_name, 
+						( @{$service->stalking_options()} == 0) ? $service->stalking_options() : join ( ",", @{$service->stalking_options} ) ) if ( defined ( $service->stalking_options ) );
+					printf ( "%s;setparam;%s;failure_prediction_enabled;%s\n", $type,$service_name, $service->failure_prediction_enabled ) if ( defined ( $service->failure_prediction_enabled ) );
+						if ( defined ( $service->event_handler )){
+							my $var = ref $service->event_handler;
+							if ($var eq "Nagios::Command"){
+								printf ( "%s;setparam;%s;event_handler;%s\n", $type, $service_name, $service->event_handler->name ) ; 
+							} else {
+								printf ( "%s;setparam;%s;event_handler;%s\n", $type, $service_name, $service->event_handler );
+							}
+						}
+					printf ( "%s;setparam;%s;event_handler_enabled;%s\n", $type, $service_name, $service->event_handler_enabled ) if ( defined ( $service->event_handler_enabled ) ); 
+					printf ( "%s;setparam;%s;notes;%s\n", $type, $service_name, $service->notes ) if ( defined ( $service->notes ) ); 	
+					printf ( "%s;setparam;%s;notes_url;%s\n", $type, $service_name, $service->notes_url ) if ( defined ( $service->notes_url ) ); 	
+					printf ( "%s;setparam;%s;action_url;%s\n", $type, $service_name, $service->action_url ) if ( defined ( $service->action_url ) ); 	
+					printf ( "%s;setparam;%s;comment;%s\n", $type, $service_name, $service->comment ) if ( defined ( $service->comment ) ); 
+
+					# Add contactgroups to service
+					if ( defined ( $service->contact_groups )  && $service->contact_groups != "" ) {
+						my $contactgroups;
+						foreach my $contactgroup ( @{$service->contact_groups} ) {
+							if ( $contactgroups == "" ) {
+								$contactgroups = $contactgroup->contactgroup_name;
+							} else {
+								$contactgroups .= "|".$contactgroup->contactgroup_name;
+							}
+						}
+						printf ( "%s;addcontactgroup;%s%s;%s\n", $type, $host_name, $service_name, $contactgroups );
+					}
+
+					# Add contacts to service
+					if ( defined ( $service->contacts ) && $service->contacts != "" ) {
+						my $contacts;
+						foreach my $contact ( @{$service->contacts} ) {
+							if ( $contacts == "" ) {
+								$contacts = $contact->name;
+							} else {
+								$contacts .= "|".$contact->name;
+							}
+						}
+						printf ( "%s;addcontact;%s%s;%s\n", $type, $host_name, $service_name, $contacts );
+					}
+					
+					# Deploy service based on previous template on all host linked to hostgroup
+					foreach my $hostgroup ( @{$service->hostgroup_name} ) {
+							# If user prefer to keep services by hostgroups
+							if ( defined ( $OPTION{'services_by_hg'} ) ) {
+								printf ( "HGSERVICE;ADD;%s;%s;%s\n", $hostgroup->hostgroup_name, $service->name, $service_name );
+							} else {
+								foreach my $host ( @{$hostgroup->members} ) {
+									printf ( "SERVICE;ADD;%s;%s;%s\n", $host->host_name, $service->name, $service_name );
+								}
+							}
+					}
+				} else {
+				
+					if ( !defined ( $service->register ) || $service->register == 0 ) {
+						$type = "STPL";
+						$service_name = $service->name;
+						printf ( "STPL;ADD;%s;%s;%s\n", $service_name, ( defined ( $service->service_description ) ? $service->service_description : $service_name ), $service->use );
+					} else {
+						$type = "SERVICE";
+						$service_name = $service->name;
+						
+						$host_name = $host_name . ";";
+
+						printf ( "%s;ADD;%s%s;%s\n", $type, $host_name, $service_name, $service->use );
+						
+						#printf ( "%s;setparam;%s%s;template;%s\n", $type, $host_name, $service_name, $service->use ) if ( defined ( $service->use ) );
+						# printf ( "%s;setparam;%s%s;description;%s\n", $type, $host_name, $service_name, $service->service_description ) if ( defined ( $service->service_description ) );
+					}
+				
+					printf ( "%s;setparam;%s%s;is_volatile;%s\n", $type, $host_name, $service_name, $service->is_volatile ) if ( defined ( $service->is_volatile ) );
+					printf ( "%s;setparam;%s%s;check_period;%s\n", $type, $host_name, $service_name, 
+						( defined ${$service->check_period}{'timeperiod_name'} ? ${$service->check_period}{'timeperiod_name'} : $service->check_period ) ) if ( defined ( $service->check_period ) );
+					my ($check_command, $check_command_arguments);
+					if ( defined ( $service->check_command ) ) {
+						$check_command = ( defined ( ${$service->check_command}{'command_name'} ) ? ${$service->check_command}{'command_name'} : $service->check_command );
+						($check_command, $check_command_arguments) = split ( '!', $check_command, 2 ) ;
+						printf ( "%s;setparam;%s%s;check_command;%s\n", $type, $host_name, $service_name, $check_command )  if ( $check_command !~ m/^\$/ );
+						printf ( "%s;setparam;%s%s;check_command_arguments;!%s\n", $type, $host_name, $service_name, $check_command_arguments )  if ( defined ( $check_command_arguments ) );
+					}
+					# Not available in Centreon CLAPI v1.8
+					#printf ( "%s;setparam;%s%s;initial_state;%s\n", $type, $host_name, $service_name, 
+					#	( @{$service->initial_state()} == 0 ) ? $service->initial_state() : join ( ",", @{$service->initial_state} ) ) if ( defined ( $service->initial_state ) );
+					printf ( "%s;setparam;%s%s;max_check_attempts;%s\n", $type, $host_name, $service_name, $service->max_check_attempts ) if ( defined ( $service->max_check_attempts ) );
+					printf ( "%s;setparam;%s%s;normal_check_interval;%s\n", $type, $host_name, $service_name, $service->check_interval ) if ( defined ( $service->check_interval ) );
+					printf ( "%s;setparam;%s%s;retry_check_interval;%s\n", $type, $host_name, $service_name, $service->retry_interval ) if ( defined ( $service->retry_interval ) );
+					printf ( "%s;setparam;%s%s;active_checks_enabled;%s\n", $type, $host_name, $service_name, $service->active_checks_enabled ) if ( defined ( $service->active_checks_enabled ) );
+					printf ( "%s;setparam;%s%s;passive_checks_enabled;%s\n", $type, $host_name, $service_name, $service->passive_checks_enabled ) if ( defined ( $service->passive_checks_enabled ) );
+					printf ( "%s;setparam;%s%s;notifications_enabled;%s\n", $type, $host_name, $service_name, $service->notifications_enabled ) if ( defined ( $service->notifications_enabled ) );
+					printf ( "%s;setparam;%s%s;notification_interval;%s\n", $type, $host_name, $service_name, $service->notification_interval ) if ( defined ( $service->notification_interval ) );
+					printf ( "%s;setparam;%s%s;notification_period;%s\n", $type, $host_name, $service_name, 
+						( defined ${$service->notification_period}{'timeperiod_name'} ? ${$service->notification_period}{'timeperiod_name'} : $service->notification_period ) ) if ( defined ( $service->notification_period ) );
+					printf ( "%s;setparam;%s%s;notification_options;%s\n", $type, $host_name, $service_name, 
+						( @{$service->notification_options()} == 0 ) ? $service->notification_options() : join ( ",", @{$service->notification_options} ) ) if ( defined ( $service->notification_options ) );
+					printf ( "%s;setparam;%s%s;first_notification_delay;%s\n", $type, $host_name, $service_name, $service->first_notification_delay ) if ( defined ( $service->first_notification_delay ) ); 
+					printf ( "%s;setparam;%s%s;parallelize_check;%s\n", $type, $host_name, $service_name, $service->parallelize_check ) if ( defined ( $service->parallelize_check ) ); 
+					printf ( "%s;setparam;%s%s;obsess_over_service;%s\n", $type, $host_name, $service_name, $service->obsess_over_service ) if ( defined ( $service->obsess_over_service ) ); 
+					printf ( "%s;setparam;%s%s;check_freshness;%s\n", $type, $host_name, $service_name, $service->check_freshness ) if ( defined ( $service->check_freshness ) ); 
+					printf ( "%s;setparam;%s%s;freshness_threshold;%s\n", $type, $host_name, $service_name, $service->freshness_threshold ) if ( defined ( $service->freshness_threshold ) ); 
+					printf ( "%s;setparam;%s%s;flap_detection_enabled;%s\n", $type, $host_name, $service_name, $service->flap_detection_enabled ) if ( defined ( $service->flap_detection_enabled ) ); 
+					printf ( "%s;setparam;%s%s;flap_detection_options;%s\n", $type, $host_name, $service_name, 
+						( @{$service->flap_detection_options()} == 0) ? $service->flap_detection_options() : join ( ",", @{$service->flap_detection_options} ) ) if ( defined ( $service->flap_detection_options ) );
+					printf ( "%s;setparam;%s%s;low_flap_threshold;%s\n", $type, $host_name, $service_name, $service->low_flap_threshold ) if ( defined ( $service->low_flap_threshold ) ); 
+					printf ( "%s;setparam;%s%s;high_flap_threshold;%s\n", $type, $host_name, $service_name, $service->high_flap_threshold ) if ( defined ( $service->high_flap_threshold ) ); 
+					printf ( "%s;setparam;%s%s;process_perf_data;%s\n", $type, $host_name, $service_name, $service->process_perf_data ) if ( defined ( $service->process_perf_data ) ); 
+					printf ( "%s;setparam;%s%s;retain_status_information;%s\n", $type, $host_name, $service_name, $service->retain_status_information ) if ( defined ( $service->retain_status_information ) ); 
+					printf ( "%s;setparam;%s%s;retain_nonstatus_information;%s\n", $type, $host_name, $service_name, $service->retain_nonstatus_information ) if ( defined ( $service->retain_nonstatus_information ) ); 
+					printf ( "%s;setparam;%s%s;stalking_options;%s\n", $type, $host_name, $service_name, 
+						( @{$service->stalking_options()} == 0) ? $service->stalking_options() : join ( ",", @{$service->stalking_options} ) ) if ( defined ( $service->stalking_options ) );
+					printf ( "%s;setparam;%s%s;failure_prediction_enabled;%s\n", $type, $host_name, $service_name, $service->failure_prediction_enabled ) if ( defined ( $service->failure_prediction_enabled ) );
+						if ( defined ( $service->event_handler )){
+							my $var = ref $service->event_handler;
+							if ($var eq "Nagios::Command"){
+								printf ( "%s;setparam;%s%s;event_handler;%s\n", $type, $host_name, $service_name, $service->event_handler->name ) if ( defined ( $service->event_handler ) ); 
+							} else {
+								printf ( "%s;setparam;%s%s;event_handler;%s\n", $type, $host_name, $service_name, $service->event_handler ) if ( defined ( $service->event_handler ) ); 
+							}
+						}
+					printf ( "%s;setparam;%s%s;event_handler_enabled;%s\n", $type, $host_name, $service_name, $service->event_handler_enabled ) if ( defined ( $service->event_handler_enabled ) ); 
+					printf ( "%s;setparam;%s%s;notes;%s\n", $type, $host_name, $service_name, $service->notes ) if ( defined ( $service->notes ) ); 	
+					printf ( "%s;setparam;%s%s;notes_url;%s\n", $type, $host_name, $service_name, $service->notes_url ) if ( defined ( $service->notes_url ) ); 	
+					printf ( "%s;setparam;%s%s;action_url;%s\n", $type, $host_name, $service_name, $service->action_url ) if ( defined ( $service->action_url ) ); 	
+					printf ( "%s;setparam;%s%s;comment;%s\n", $type, $host_name, $service_name, $service->comment ) if ( defined ( $service->comment ) ); 
+	
+					# Add contactgroups to service
+					if ( defined ( $service->contact_groups )  && $service->contact_groups != "" ) {
+						my $contactgroups_list;
+						if ( scalar @{$service->contact_groups} > 1 ) {
+							 foreach my $item ( @{$service->contact_groups} ) {
+							     $item_type = ref $item;
+			                     if ($item_type eq "Nagios::ContactGroup"){
+			                         $contactgroups_list .= sprintf ( "%s", $item->name) . "|";
+				                 } else {
+				                     $contactgroups_list .= sprintf ( "%s", $item) . "|";
+				                 }
+							}
+							$contactgroups_list =~ s/\|$//;
+							printf ( "%s;setcontactgroup;%s%s;%s\n", $type, $host_name, $service_name, $contactgroups_list );
+						} else {
+							foreach my $item ( @{$service->contact_groups} ) {
+								printf ( "%s;addcontactgroup;%s%s;%s\n", $type, $host_name, $service_name, $item->contactgroup_name );
+							}
+						}
+					}
+	
+					# Add contacts to service
+					if ( defined ( $service->contacts ) && $service->contacts != "" ) {
+						my $contacts;
+						foreach my $contact ( @{$service->contacts} ) {
+							if ( $contacts == "" ) {
+								$contacts = $contact->name;
+							} else {
+								$contacts .= "|".$contact->name;
+							}
+						}
+						printf ( "%s;addcontact;%s%s;%s\n", $type, $host_name, $service_name, $contacts );
+					}
+	
+					# Add service to servicegroups
+					if (defined ( $service->servicegroups ) ) {
+						foreach my $servicegroup ( @{$service->servicegroups} ) {
+							foreach my $service ( @{$servicegroup->members} ) {
+								$servicegroups{$servicegroup->servicegroup_name}{$service->name} = $service->host_name;
+							}
+						}
+					}
+				
+				}
+			}
+		$serviceTemplates_exported{$service->name . $host_name . $service->hostgroup_name} = 1;
 		}
-		$serviceTemplates_exported{$service->name} = 1;
 	}
 }
 
@@ -697,20 +741,22 @@ sub export_serviceextinfo {
 	
 	foreach my $serviceextendedinfo ( @list_serviceextendedinfo ) {
 		my ($host_name, $type);
-		foreach my $host ( @{$serviceextendedinfo->host_name} ) {
-			$host_name = $host->host_name;
-		}
-		if ( defined ( $serviceextendedinfo ) && ( $serviceextendedinfo != 0 ) && defined ( $host_name ) ) {
-			if ( !defined ( ${$serviceextendedinfo->service_description}{'register'} ) || ${$serviceextendedinfo->service_description}{'register'} == 0 ) {
-				$type = "STPL";
-			} else {
-				$type = "SERVICE";
+		if (defined ($serviceextendedinfo->host_name)){
+			foreach my $host ( @{$serviceextendedinfo->host_name} ) {
+				$host_name = $host->host_name;
 			}
-			printf ( "%s;setparam;%s%s;notes;%s\n", $type, $host_name, ${$serviceextendedinfo->service_description}{'service_description'}, $serviceextendedinfo->notes ) if ( defined ( $serviceextendedinfo->notes ) );
-			printf ( "%s;setparam;%s%s;notes_url;%s\n", $type, $host_name, ${$serviceextendedinfo->service_description}{'service_description'}, $serviceextendedinfo->notes_url ) if ( defined ( $serviceextendedinfo->notes_url ) );
-			printf ( "%s;setparam;%s%s;action_url;%s\n", $type, $host_name, ${$serviceextendedinfo->service_description}{'service_description'}, $serviceextendedinfo->action_url ) if ( defined ( $serviceextendedinfo->action_url ) );
-			printf ( "%s;setparam;%s%s;icon_image;%s\n", $type, $host_name, ${$serviceextendedinfo->service_description}{'service_description'}, $serviceextendedinfo->icon_image ) if ( defined ( $serviceextendedinfo->icon_image ) );
-			printf ( "%s;setparam;%s%s;icon_image_alt;%s\n", $type, $host_name, ${$serviceextendedinfo->service_description}{'service_description'}, $serviceextendedinfo->icon_image_alt ) if ( defined ( $serviceextendedinfo->icon_image_alt ) );
+			if ( defined ( $serviceextendedinfo ) && ( $serviceextendedinfo != 0 ) && defined ( $host_name ) ) {
+				if ( !defined ( ${$serviceextendedinfo->service_description}{'register'} ) || ${$serviceextendedinfo->service_description}{'register'} == 0 ) {
+					$type = "STPL";
+				} else {
+					$type = "SERVICE";
+				}
+				printf ( "%s;setparam;%s%s;notes;%s\n", $type, $host_name, ${$serviceextendedinfo->service_description}{'service_description'}, $serviceextendedinfo->notes ) if ( defined ( $serviceextendedinfo->notes ) );
+				printf ( "%s;setparam;%s%s;notes_url;%s\n", $type, $host_name, ${$serviceextendedinfo->service_description}{'service_description'}, $serviceextendedinfo->notes_url ) if ( defined ( $serviceextendedinfo->notes_url ) );
+				printf ( "%s;setparam;%s%s;action_url;%s\n", $type, $host_name, ${$serviceextendedinfo->service_description}{'service_description'}, $serviceextendedinfo->action_url ) if ( defined ( $serviceextendedinfo->action_url ) );
+				printf ( "%s;setparam;%s%s;icon_image;%s\n", $type, $host_name, ${$serviceextendedinfo->service_description}{'service_description'}, $serviceextendedinfo->icon_image ) if ( defined ( $serviceextendedinfo->icon_image ) );
+				printf ( "%s;setparam;%s%s;icon_image_alt;%s\n", $type, $host_name, ${$serviceextendedinfo->service_description}{'service_description'}, $serviceextendedinfo->icon_image_alt ) if ( defined ( $serviceextendedinfo->icon_image_alt ) );
+			}
 		}
 	}
 }
