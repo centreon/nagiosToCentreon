@@ -513,8 +513,8 @@ sub export_services {
 					}
 				}
 			}
-
-			if ( ( $service->name !~ m/ba\_/ ) && ( $serviceTemplates_exported{$service->name . $host_name . $service->hostgroup_name} == 0 ) ) {
+		    # Assuming that BA Monitoring service names start with ba_. 
+			if ( ( $service->name !~ m/^ba\_/ ) && ( $serviceTemplates_exported{$service->name . $host_name . $service->hostgroup_name} == 0 ) ) {
 				my $service_name;
 				my $type = "SERVICE";
 				if ( defined ( $service->hostgroup_name ) ) {
