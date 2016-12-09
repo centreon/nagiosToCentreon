@@ -338,7 +338,7 @@ sub export_hosts {
 			printf ( "%s;setparam;%s;stalking_options;%s\n", $type, $host_name, 
 				( @{$host->stalking_options()} == 0) ? $host->stalking_options() : join ( ",", @{$host->stalking_options} ) ) if ( defined ( $host->stalking_options ) );
 
-			# Add contactgroups to host
+            # Add contactgroups to host
 			if ( defined ( $host->contact_groups )  && $host->contact_groups != "" ) {
 				my $contactgroups_list = "";
 				if ( scalar @{$host->contact_groups} > 1 ) {
@@ -357,10 +357,16 @@ sub export_hosts {
 			if ( defined ( $host->contacts ) && $host->contacts != "" ) {
 				my $contacts;
 				foreach my $contact ( @{$host->contacts} ) {
-					if ( $contacts == "" ) {
-						$contacts = $contact->name;
+                    my $value;
+                    if ($contact->can(name)) {
+						$value = $contact->name;
+                    } else {
+                        $value = $contact;
+                    }
+					if ( $contacts eq "" ) {
+						$contacts = $value;
 					} else {
-						$contacts .= "|".$contact->name;
+						$contacts .= "|".$value;
 					}
 				}
 				printf ( "%s;setcontact;%s;%s\n", $type, $host_name, $contacts );
@@ -668,10 +674,16 @@ sub export_services {
 				if ( defined ( $service->contacts ) && $service->contacts != "" ) {
 					my $contacts;
 					foreach my $contact ( @{$service->contacts} ) {
-						if ( $contacts == "" ) {
-							$contacts = $contact->name;
+                        my $value;
+						if ($contact->can(name)) {
+                            $value = $contact->name;
+                        } else {
+                            $value = $contact;
+                        }
+						if ( $contacts eq "" ) {
+							$contacts = $value;
 						} else {
-							$contacts .= "|".$contact->name;
+							$contacts .= "|".$value;
 						}
 					}
 					printf ( "%s;addcontact;%s%s;%s\n", $type, $host_name, $service_name, $contacts );
