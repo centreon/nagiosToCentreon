@@ -339,7 +339,7 @@ sub export_hosts {
 				( @{$host->stalking_options()} == 0) ? $host->stalking_options() : join ( ",", @{$host->stalking_options} ) ) if ( defined ( $host->stalking_options ) );
 
             # Add contactgroups to host
-			if ( defined ( $host->contact_groups )  && $host->contact_groups != "" ) {
+			if ( defined ( $host->contact_groups )  && $host->contact_groups ne '' ) {
 				my $contactgroups_list = "";
 				if ( scalar @{$host->contact_groups} > 1 ) {
 					foreach my $item ( @{$host->contact_groups} ) {
@@ -347,14 +347,17 @@ sub export_hosts {
 					}
 					$contactgroups_list =~ s/\|$//;
 					printf ( "%s;setcontactgroup;%s;%s\n", $type, $host_name, $contactgroups_list );
-				} else {
+				} elsif ( defined ( @{$host->contact_groups} ) ) {
 					foreach my $item ( @{$host->contact_groups} ) {
-						printf ( "%s;addcontactgroup;%s;%s\n", $type, $host_name, $item->contactgroup_name );
+					    printf ( "%s;addcontactgroup;%s;%s\n", $type, $host_name, $item->contactgroup_name );
 					}
+				} else {
+					printf ( "%s;addcontactgroup;%s;%s\n", $type, $host_name, $host->contact_groups );
 				}
 			}
+
 			# Add contacts to host
-			if ( defined ( $host->contacts ) && $host->contacts != "" ) {
+			if ( defined ( $host->contacts ) && $host->contacts ne '' ) {
 				my $contacts;
 				foreach my $contact ( @{$host->contacts} ) {
                     my $value;
@@ -555,7 +558,7 @@ sub export_services {
 				printf ( "%s;setparam;%s;comment;%s\n", $type, $service_name, $service->comment ) if ( defined ( $service->comment ) ); 
 
 				# Add contactgroups to service
-				if ( defined ( $service->contact_groups )  && $service->contact_groups != "" ) {
+				if ( defined ( $service->contact_groups )  && $service->contact_groups ne '' ) {
 					my $contactgroups;
 					foreach my $contactgroup ( @{$service->contact_groups} ) {
 						if ( $contactgroups == "" ) {
@@ -568,7 +571,7 @@ sub export_services {
 				}
 
 				# Add contacts to service
-				if ( defined ( $service->contacts ) && $service->contacts != "" ) {
+				if ( defined ( $service->contacts ) && $service->contacts ne '' ) {
 					my $contacts;
 					foreach my $contact ( @{$service->contacts} ) {
 						if ( $contacts == "" ) {
