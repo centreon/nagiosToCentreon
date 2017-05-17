@@ -502,7 +502,7 @@ sub export_services {
 			}
 		}
 
-		if ( ( $service->name !~ m/ba\_/ ) && ( $serviceTemplates_exported{$service->name} == 0 ) ) {
+		if ( ( $service->name !~ m/ba\_/ ) && ( $is_service_to_export == 1 ) ) {
 			my $service_name;
 			my $type = "SERVICE";
 			if ( defined ( $service->hostgroup_name ) ) {
@@ -594,11 +594,13 @@ sub export_services {
 							}
 						}
 				}
+				$serviceTemplates_exported{$service->name} = 1;
 			} else {
 				if ( !defined ( $service->register ) || $service->register == 0 ) {
 					$type = "STPL";
 					$service_name = $service->name;
 					printf ( "STPL;ADD;%s;%s;%s\n", $service_name, ( defined ( $service->service_description ) ? $service->service_description : $service_name ), $service->use );
+					$serviceTemplates_exported{$service->name} = 1;
 				} else {
 					$type = "SERVICE";
 					$service_name = $service->name;
@@ -702,7 +704,6 @@ sub export_services {
 				}
 			}
 		}
-		$serviceTemplates_exported{$service->name} = 1;
 	}
 }
 
