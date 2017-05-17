@@ -267,7 +267,7 @@ sub export_hosts {
 			my $type = "HOST";
 			my $host_name;
 			my $list_of_tpl = $host->use if ( defined ( $host->use ) );
-			$list_of_tpl =~ s/,/|/ if ( defined ( $host->use ) );;
+			$list_of_tpl =~ s/,/|/g if ( defined ( $host->use ) );;
 			#my $list_of_hostgroup = $host->use if ( defined ( $host->hostgroups ) );
 			#$list_of_hostgroup =~ s/,/|/ if ( defined ( $host->hostgroups ) );;
 			
