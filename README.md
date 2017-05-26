@@ -7,8 +7,8 @@ interface.
 
 ## Prerequisites
 
-First of all you need a CES server installed and ready to use. Please see the
-document on document.centreon.com to install a Centreon server based on CES.
+First of all you need a Centreon server installed and ready to use. Please see the
+document on htt://document.centreon.com to install a Centreon server based on ISO or RPM.
 
 ## Installation
 
@@ -29,7 +29,7 @@ Note : perl-List-Compare is from EPEL repo for CentOS/Red Hat
 
 ## Usage
 
-On a fresh CES server the default poller is named "Central". If you rename it
+On a fresh Centreon server the default poller is named "Central". If you rename it
 or if you want to link this Nagios configuration to a predifined poller you 
 have to change the poller name on line 65
 
@@ -39,7 +39,7 @@ To display help use the command:
 
     $ perl nagios_reader_to_centreon_clapi.pl --help
     ######################################################
-    #    Copyright (c) 2005-2016 Centreon                #
+    #    Copyright (c) 2005-2017 Centreon                #
     #    Bugs to http://github.com/nagiosToCentreon      #
     ######################################################
     
@@ -58,9 +58,9 @@ To run the script please use the following command:
 
     $ perl nagios_reader_to_centreon_clapi.pl --config /usr/local/nagios/etc/nagios.cfg > /tmp/centreon_clapi_import_commands.txt
 
-Export the file /tmp/centreon_clapi_import_commands.txt on your CES server.
+Export the file /tmp/centreon_clapi_import_commands.txt on your Centreon server.
 
-Run the following command to import configuration into Centreon on your CES server:
+Run the following command to import configuration into Centreon on your Centreon server:
 
-    $ /usr/share/centreon/www/modules/centreon-clapi/core/centreon -u admin -p @PASSWORD -i /tmp/centreon_clapi_import_commands.txt
+    $ /usr/share/centreon/bin/centreon -u admin -p @PASSWORD -i /tmp/centreon_clapi_import_commands.txt
 
