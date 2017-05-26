@@ -88,7 +88,7 @@ sub print_usage () {
 
 sub print_help () {
 		print "######################################################\n";
-		print "#    Copyright (c) 2005-2016 Centreon                #\n";
+		print "#    Copyright (c) 2005-2017 Centreon                #\n";
 		print "#    Bugs to http://github.com/nagiosToCentreon      #\n";
 		print "######################################################\n";
     	print "\n";
