@@ -26,7 +26,7 @@ use Nagios::Config;
 use Nagios::Object::Config;
 use Data::Dumper;
 my $PROGNAME = $0;
-my $VERSION = "1.0";
+my $VERSION = "1.0.1";
 my %ERRORS = ( "OK" => 0, "WARNING" => 1, "CRITICAL" => 2, "UNKNOWN" => 3, "PENDING" => 4 );
 
 my %OPTION = ( "help" => undef,
