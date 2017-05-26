@@ -323,9 +323,9 @@ sub export_hosts {
 				my $parents;
 				foreach my $host ( @{$host->parents} ) {
 					if ( $parents == "" ) {
-						$parents = $host_name;
+						$parents = $host->name;
 					} else {
-						$parents .= "|".$host_name;
+						$parents .= "|".$host->name;
 					}
 				}
 				printf ( "%s;setparam;%s;parents;%s\n", $type, $host_name, $parents );
