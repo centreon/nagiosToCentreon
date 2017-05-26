@@ -524,8 +524,8 @@ sub export_services {
 				#printf ( "%s;setparam;%s;initial_state;%s\n", $type, $service_name,
 				#	( @{$service->initial_state()} == 0 ) ? $service->initial_state() : join ( ",", @{$service->initial_state} ) ) if ( defined ( $service->initial_state ) );
 				printf ( "%s;setparam;%s;max_check_attempts;%s\n", $type, $service_name, $service->max_check_attempts ) if ( defined ( $service->max_check_attempts ) );
-				printf ( "%s;setparam;%s;normal_check_interval;%s\n", $type, $service_name, $service->check_interval ) if ( defined ( $service->check_interval ) );
-				printf ( "%s;setparam;%s;retry_check_interval;%s\n", $type, $service_name, $service->retry_interval ) if ( defined ( $service->retry_interval ) );
+				printf ( "%s;setparam;%s;normal_check_interval;%s\n", $type, $service_name, $service->normal_check_interval ) if ( defined ( $service->normal_check_interval ) );
+				printf ( "%s;setparam;%s;retry_check_interval;%s\n", $type, $service_name, $service->retry_check_interval ) if ( defined ( $service->retry_check_interval ) );
 				printf ( "%s;setparam;%s;active_checks_enabled;%s\n", $type, $service_name, $service->active_checks_enabled ) if ( defined ( $service->active_checks_enabled ) );
 				printf ( "%s;setparam;%s;passive_checks_enabled;%s\n", $type, $service_name, $service->passive_checks_enabled ) if ( defined ( $service->passive_checks_enabled ) );
 				printf ( "%s;setparam;%s;notifications_enabled;%s\n", $type, $service_name, $service->notifications_enabled ) if ( defined ( $service->notifications_enabled ) );
@@ -624,8 +624,8 @@ sub export_services {
 				#printf ( "%s;setparam;%s%s;initial_state;%s\n", $type, $host_name, $service_name,
 				#	( @{$service->initial_state()} == 0 ) ? $service->initial_state() : join ( ",", @{$service->initial_state} ) ) if ( defined ( $service->initial_state ) );
 				printf ( "%s;setparam;%s%s;max_check_attempts;%s\n", $type, $host_name, $service_name, $service->max_check_attempts ) if ( defined ( $service->max_check_attempts ) );
-				printf ( "%s;setparam;%s%s;normal_check_interval;%s\n", $type, $host_name, $service_name, $service->check_interval ) if ( defined ( $service->check_interval ) );
-				printf ( "%s;setparam;%s%s;retry_check_interval;%s\n", $type, $host_name, $service_name, $service->retry_interval ) if ( defined ( $service->retry_interval ) );
+				printf ( "%s;setparam;%s%s;normal_check_interval;%s\n", $type, $host_name, $service_name, $service->normal_check_interval ) if ( defined ( $service->normal_check_interval ) );
+				printf ( "%s;setparam;%s%s;retry_check_interval;%s\n", $type, $host_name, $service_name, $service->retry_check_interval ) if ( defined ( $service->retry_check_interval ) );
 				printf ( "%s;setparam;%s%s;active_checks_enabled;%s\n", $type, $host_name, $service_name, $service->active_checks_enabled ) if ( defined ( $service->active_checks_enabled ) );
 				printf ( "%s;setparam;%s%s;passive_checks_enabled;%s\n", $type, $host_name, $service_name, $service->passive_checks_enabled ) if ( defined ( $service->passive_checks_enabled ) );
 				printf ( "%s;setparam;%s%s;notifications_enabled;%s\n", $type, $host_name, $service_name, $service->notifications_enabled ) if ( defined ( $service->notifications_enabled ) );
