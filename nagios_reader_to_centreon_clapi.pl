@@ -57,6 +57,35 @@ my %servicegroups;
 my %host_exported;
 my %service_exported;
 my %resource_macros;
+my @config_files = ('centengine.cfg', 
+                    'nagios.cfg', 
+                    'resource.cfg', 
+                    'commands.cfg', 
+                    'checkcommands.cfg', 
+                    'misccommands.cfg', 
+                    'contactgroups.cfg', 
+                    'contacts.cfg', 
+                    'dependencies.cfg', 
+                    'escalations.cfg', 
+                    'hostTemplates.cfg', 
+                    'hostgroups.cfg', 
+                    'hosts.cfg', 
+                    'meta_commands.cfg', 
+                    'meta_host.cfg', 
+                    'meta_services.cfg', 
+                    'meta_timeperiod.cfg', 
+                    'serviceTemplates.cfg', 
+                    'servicegroups.cfg', 
+                    'services.cfg', 
+                    'timeperiods.cfg', 
+                    'centreon-bam-command.cfg', 
+                    'centreon-bam-contactgroups.cfg', 
+                    'centreon-bam-contacts.cfg', 
+                    'centreon-bam-dependencies.cfg', 
+                    'centreon-bam-escalations.cfg', 
+                    'centreon-bam-host.cfg', 
+                    'centreon-bam-services.cfg', 
+                    'centreon-bam-timeperiod.cfg' );
 
 #############
 # Functions #
@@ -118,7 +147,7 @@ sub export_commands {
     my @commands_array = @_;
 
     foreach my $command (@commands_array) {
-        next if (!defined($command->{'command_name'}) || $command->{'command_name'} =~ m/bam|check_meta|meta_notify/);
+        next if (!defined($command->{'command_name'}) || $command->{'command_name'} =~ m/bam|check_meta|meta_notify/ || !defined($command->{'command_line'}));
         
         my $command_type = "check";
         if ($command->{'command_name'} =~ m/notify/) {
@@ -663,9 +692,10 @@ $objects = Nagios::Object::Config->new(Version => $OPTION{'version'});
 
 opendir (DIR, $OPTION{'config'}) or die $!;
 while (my $file = readdir(DIR)) {
-    next if ($file =~ m/connector.cfg/);
+    next if (!grep { $file eq $_ } @config_files);
     $objects->parse($OPTION{'config'}."/".$file);
 }
+closedir DIR;
 
 # Generate Centreon CLAPI commands
 export_resources();
