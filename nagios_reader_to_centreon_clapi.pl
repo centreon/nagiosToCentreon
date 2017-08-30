@@ -96,9 +96,9 @@ sub print_usage () {
     print $VERSION."\n";
     print "Usage: ";
     print $PROGNAME."\n";
-    print "    -C (--config)      Path to nagios configuration files (must be a directory)\n";
-    print "    -V (--version)     Nagios version of the configuration files\n";
-    print "    -P (--poller)      Name of the targeted poller\n";
+    print "    -C (--config)      Path to nagios configuration files (must be a directory) (Default: /usr/local/nagios/etc/)\n";
+    print "    -V (--version)     Nagios version of the configuration files (Default: 3)\n";
+    print "    -P (--poller)      Name of the targeted poller (Default: Central)\n";
     print "    -p (--prefix)      Add a prefix before commands, contacts, templates, groups, etc.\n";
     print "    -h (--help)        Usage help\n";
 }
