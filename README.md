@@ -29,12 +29,6 @@ Note : perl-List-Compare is from EPEL repo for CentOS/Red Hat
 
 ## Usage
 
-On a fresh Centreon server the default poller is named "Central". If you rename it
-or if you want to link this Nagios configuration to a predifined poller you 
-have to change the poller name on line 65
-
-    my $default_poller = "Central";
-
 To display help use the command:
 
     $ perl nagios_reader_to_centreon_clapi.pl --help
@@ -44,19 +38,20 @@ To display help use the command:
     ######################################################
     
     Usage: nagios_reader_to_centreon_clapi.pl
-        -V (--version)     Show script version
+        -C (--config)      Path to nagios configuration files (must be a directory) (Default: /usr/local/nagios/etc/)
+        -V (--version)     Nagios version of the configuration files (Default: 3)
+        -P (--poller)      Name of the targeted poller (Default: Central)
+        -p (--prefix)      Add a prefix before commands, contacts, templates, groups, etc.
         -h (--help)        Usage help
-        -C (--config)      Path to nagios.cfg file
-		-S (--servcies-hg) To keep services by hostgroups definition
 
-Note : By default services by hostgroups will be transformed. A template of 
+Note : Services by hostgroups will be transformed. A template of 
 service will be created using old service definition and a unitary service by 
 host (for all hosts linked to the hostgroup) will be created linked to the 
 previous service template.
 
 To run the script please use the following command:
 
-    $ perl nagios_reader_to_centreon_clapi.pl --config /usr/local/nagios/etc/nagios.cfg > /tmp/centreon_clapi_import_commands.txt
+    $ perl nagios_reader_to_centreon_clapi.pl --config /usr/local/nagios/etc/ > /tmp/centreon_clapi_import_commands.txt
 
 Export the file /tmp/centreon_clapi_import_commands.txt on your Centreon server.
 
