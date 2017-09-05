@@ -57,35 +57,6 @@ my %servicegroups;
 my %host_exported;
 my %service_exported;
 my %resource_macros;
-my @config_files = ('centengine.cfg', 
-                    'nagios.cfg', 
-                    'resource.cfg', 
-                    'commands.cfg', 
-                    'checkcommands.cfg', 
-                    'misccommands.cfg', 
-                    'contactgroups.cfg', 
-                    'contacts.cfg', 
-                    'dependencies.cfg', 
-                    'escalations.cfg', 
-                    'hostTemplates.cfg', 
-                    'hostgroups.cfg', 
-                    'hosts.cfg', 
-                    'meta_commands.cfg', 
-                    'meta_host.cfg', 
-                    'meta_services.cfg', 
-                    'meta_timeperiod.cfg', 
-                    'serviceTemplates.cfg', 
-                    'servicegroups.cfg', 
-                    'services.cfg', 
-                    'timeperiods.cfg', 
-                    'centreon-bam-command.cfg', 
-                    'centreon-bam-contactgroups.cfg', 
-                    'centreon-bam-contacts.cfg', 
-                    'centreon-bam-dependencies.cfg', 
-                    'centreon-bam-escalations.cfg', 
-                    'centreon-bam-host.cfg', 
-                    'centreon-bam-services.cfg', 
-                    'centreon-bam-timeperiod.cfg' );
 
 #############
 # Functions #
@@ -271,6 +242,7 @@ sub export_hosts {
     my @templates;
 
     foreach my $host (@hosts_array) {
+        next if (ref $host ne "Nagios::Host");
         if (!defined($host->{'host_name'})) { $host->{'host_name'} = $host->{'name'} };
 
         # If the host uses templates, we export the templates first
@@ -439,6 +411,7 @@ sub export_services {
     my @services_array = @_;
 
     foreach my $service (@services_array) {
+        next if (ref $service ne "Nagios::Service");
         if (defined($service->{'name'}) && ($service->{'name'} !~ m/^ba\_|^meta\_/) && !defined($service_exported{$service->{'name'}}) || defined($service->{'hostgroup_name'})) {
             # If the service uses a template, we export the template first
             if (defined($service->{'use'})) {
@@ -607,7 +580,7 @@ sub export_services {
             if (ref $service->{'hostgroup_name'}) {
                 foreach my $hostgroup (@{$service->{'hostgroup_name'}}) {
                     $hostgroup = $objects->find_object($hostgroup, "Nagios::HostGroup");
-                    # $objects->resolve($hostgroup);
+                    next if (ref $hostgroup ne "Nagios::HostGroup");
                     if (defined($hostgroup->{'members'})) {
                         if (ref $hostgroup->{'members'}) {
                             foreach my $host (@{$hostgroup->{'members'}}) {
@@ -618,7 +591,7 @@ sub export_services {
                         }
                     }
                     # Loop to add hosts from host definition
-                    if (defined($hostgroups{$hostgroup->{'hostgroup_name'}})) {
+                    if (defined($hostgroup->{'hostgroup_name'}) && defined($hostgroups{$hostgroup->{'hostgroup_name'}})) {
                         foreach my $host (@{$hostgroups{$hostgroup->{'hostgroup_name'}}}) {
                             push @{$clapi{SERVICE}}, "SERVICE;ADD;".$host.";".$service->{'service_description'}.";".$OPTION{'prefix'}.$service->{'name'};
                         }
@@ -626,7 +599,7 @@ sub export_services {
                 }
             } else {
                 my $hostgroup = $objects->find_object($service->{'hostgroup_name'}, "Nagios::HostGroup");
-                # $objects->resolve($hostgroup);
+                next if (ref $hostgroup ne "Nagios::HostGroup");
                 if (defined($hostgroup->{'members'})) {
                     if (ref $hostgroup->{'members'}) {
                         foreach my $host (@{$hostgroup->{'members'}}) {
@@ -637,7 +610,7 @@ sub export_services {
                     }
                 }
                 # Loop to add hosts from host definition
-                if (defined($hostgroups{$hostgroup->{'hostgroup_name'}})) {
+                if (defined($hostgroup->{'hostgroup_name'}) && defined($hostgroups{$hostgroup->{'hostgroup_name'}})) {
                     foreach my $host (@{$hostgroups{$hostgroup->{'hostgroup_name'}}}) {
                         push @{$clapi{SERVICE}}, "SERVICE;ADD;".$host.";".$service->{'service_description'}.";".$OPTION{'prefix'}.$service->{'name'};
                     }
@@ -692,7 +665,7 @@ $objects = Nagios::Object::Config->new(Version => $OPTION{'version'});
 
 opendir (DIR, $OPTION{'config'}) or die $!;
 while (my $file = readdir(DIR)) {
-    next if (!grep { $file eq $_ } @config_files);
+    next if ($file =~ m/^connectors.cfg$|^\./ || $file !~ m/\.cfg$/);
     $objects->parse($OPTION{'config'}."/".$file);
 }
 closedir DIR;
