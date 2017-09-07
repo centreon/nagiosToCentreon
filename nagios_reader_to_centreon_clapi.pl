@@ -73,7 +73,7 @@ sub print_usage () {
     print "    -V (--version)     Nagios version of the configuration files (Default: 3)\n";
     print "    -P (--poller)      Name of the targeted poller (Default: Central)\n";
     print "    -p (--prefix)      Add a prefix before commands, contacts, templates, groups, etc.\n";
-    print "    -d (--swap)        Swap alias and name of contacts for the configurations that need it\n";
+    print "    -s (--swap)        Swap alias and name of contacts for the configurations that need it\n";
     print "    -h (--help)        Usage help\n";
 }
 
