@@ -447,7 +447,6 @@ sub export_services {
             if (defined($service->{'check_freshness'})) { push @{$clapi{STPL}}, "STPL;setparam;".$OPTION{'prefix'}.$service->{'name'}.";check_freshness;".$service->{'check_freshness'} };
             if (defined($service->{'freshness_threshold'})) { push @{$clapi{STPL}}, "STPL;setparam;".$OPTION{'prefix'}.$service->{'name'}.";freshness_threshold;".$service->{'freshness_threshold'} };
             if (defined($service->{'flap_detection_enabled'})) { push @{$clapi{STPL}}, "STPL;setparam;".$OPTION{'prefix'}.$service->{'name'}.";flap_detection_enabled;".$service->{'flap_detection_enabled'} };
-            if (defined($service->{'flap_detection_options'})) { push @{$clapi{STPL}}, "STPL;setparam;".$OPTION{'prefix'}.$service->{'name'}.";flap_detection_options;".(join(",", @{$service->{'flap_detection_options'}})) };
             if (defined($service->{'low_flap_threshold'})) { push @{$clapi{STPL}}, "STPL;setparam;".$OPTION{'prefix'}.$service->{'name'}.";low_flap_threshold;".$service->{'low_flap_threshold'} };
             if (defined($service->{'high_flap_threshold'})) { push @{$clapi{STPL}}, "STPL;setparam;".$OPTION{'prefix'}.$service->{'name'}.";high_flap_threshold;".$service->{'high_flap_threshold'} };
             if (defined($service->{'process_perf_data'})) { push @{$clapi{STPL}}, "STPL;setparam;".$OPTION{'prefix'}.$service->{'name'}.";process_perf_data;".$service->{'process_perf_data'} };
@@ -520,7 +519,6 @@ sub export_services {
                 if (defined($service->{'check_freshness'})) { push @{$clapi{SERVICE}}, "SERVICE;setparam;".$host.";".$service->{'service_description'}.";check_freshness;".$service->{'check_freshness'} };
                 if (defined($service->{'freshness_threshold'})) { push @{$clapi{SERVICE}}, "SERVICE;setparam;".$host.";".$service->{'service_description'}.";freshness_threshold;".$service->{'freshness_threshold'} };
                 if (defined($service->{'flap_detection_enabled'})) { push @{$clapi{SERVICE}}, "SERVICE;setparam;".$host.";".$service->{'service_description'}.";flap_detection_enabled;".$service->{'flap_detection_enabled'} };
-                if (defined($service->{'flap_detection_options'})) { push @{$clapi{SERVICE}}, "SERVICE;setparam;".$host.";".$service->{'service_description'}.";flap_detection_options;".(join(",", @{$service->{'flap_detection_options'}})) };
                 if (defined($service->{'low_flap_threshold'})) { push @{$clapi{SERVICE}}, "SERVICE;setparam;".$host.";".$service->{'service_description'}.";low_flap_threshold;".$service->{'low_flap_threshold'} };
                 if (defined($service->{'high_flap_threshold'})) { push @{$clapi{SERVICE}}, "SERVICE;setparam;".$host.";".$service->{'service_description'}.";high_flap_threshold;".$service->{'high_flap_threshold'} };
                 if (defined($service->{'process_perf_data'})) { push @{$clapi{SERVICE}}, "SERVICE;setparam;".$host.";".$service->{'service_description'}.";process_perf_data;".$service->{'process_perf_data'} };
@@ -681,16 +679,17 @@ export_hostgroups(@{$objects->{hostgroup_list}});
 export_services(@{$objects->{service_list}});
 export_servicegroups(@{$objects->{servicegroup_list}});
 
-foreach (@{$clapi{RESOURCECFG}}) { print $_, "\n" };
-foreach (@{$clapi{CMD}}) { print $_, "\n" };
-foreach (@{$clapi{TP}}) { print $_, "\n" };
-foreach (@{$clapi{CONTACT}}) { print $_, "\n" };
-foreach (@{$clapi{CG}}) { print $_, "\n" };
-foreach (@{$clapi{HTPL}}) { print $_, "\n" };
-foreach (@{$clapi{HOST}}) { print $_, "\n" };
-foreach (@{$clapi{HG}}) { print $_, "\n" };
-foreach (@{$clapi{STPL}}) { print $_, "\n" };
-foreach (@{$clapi{SERVICE}}) { print $_, "\n" };
-foreach (@{$clapi{SG}}) { print $_, "\n" };
+my %multi;
+foreach (@{$clapi{RESOURCECFG}}) { print $_, "\n" if ! $multi{$_}++ };
+foreach (@{$clapi{CMD}}) { print $_, "\n" if ! $multi{$_}++ };
+foreach (@{$clapi{TP}}) { print $_, "\n" if ! $multi{$_}++ };
+foreach (@{$clapi{CONTACT}}) { print $_, "\n" if ! $multi{$_}++ };
+foreach (@{$clapi{CG}}) { print $_, "\n" if ! $multi{$_}++ };
+foreach (@{$clapi{HTPL}}) { print $_, "\n" if ! $multi{$_}++ };
+foreach (@{$clapi{HOST}}) { print $_, "\n" if ! $multi{$_}++ };
+foreach (@{$clapi{HG}}) { print $_, "\n" if ! $multi{$_}++ };
+foreach (@{$clapi{STPL}}) { print $_, "\n" if ! $multi{$_}++ };
+foreach (@{$clapi{SERVICE}}) { print $_, "\n" if ! $multi{$_}++ };
+foreach (@{$clapi{SG}}) { print $_, "\n" if ! $multi{$_}++ };
 
 exit 0;
