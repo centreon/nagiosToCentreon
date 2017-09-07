@@ -44,11 +44,6 @@ To display help use the command:
         -p (--prefix)      Add a prefix before commands, contacts, templates, groups, etc.
         -h (--help)        Usage help
 
-Note : Services by hostgroups will be transformed. A template of 
-service will be created using old service definition and a unitary service by 
-host (for all hosts linked to the hostgroup) will be created linked to the 
-previous service template.
-
 To run the script please use the following command:
 
     $ perl nagios_reader_to_centreon_clapi.pl --config /usr/local/nagios/etc/ > /tmp/centreon_clapi_import_commands.txt
@@ -59,3 +54,8 @@ Run the following command to import configuration into Centreon on your Centreon
 
     $ /usr/share/centreon/bin/centreon -u admin -p @PASSWORD -i /tmp/centreon_clapi_import_commands.txt
 
+## Notes
+
+- Services by hostgroups will be transformed : a template of 
+service will be created using old service definition, and a unitary service will be created for all hosts linked to the hostgroup using the newly created service template.
+- Hostgroups exclusions (i.e. hostgroup_name !Windows) won't be taken into account.
