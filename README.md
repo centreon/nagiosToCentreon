@@ -37,11 +37,13 @@ To display help use the command:
     #    Bugs to http://github.com/nagiosToCentreon      #
     ######################################################
     
+    Version: 3.0.0
     Usage: nagios_reader_to_centreon_clapi.pl
         -C (--config)      Path to nagios configuration files (must be a directory) (Default: /usr/local/nagios/etc/)
         -V (--version)     Nagios version of the configuration files (Default: 3)
         -P (--poller)      Name of the targeted poller (Default: Central)
         -p (--prefix)      Add a prefix before commands, contacts, templates, groups, etc.
+        -s (--swap)        Swap alias and name of contacts for the configurations that need it
         -h (--help)        Usage help
 
 To run the script please use the following command:
