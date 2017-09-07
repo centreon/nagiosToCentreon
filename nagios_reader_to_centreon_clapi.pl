@@ -126,9 +126,11 @@ sub export_commands {
         } elsif ($command->{'command_name'} =~ m/^process\-service\-perfdata|^submit\-host\-check\-result|^submit\-service\-check\-result/) {
             $command_type = "misc";
         }
-        
-        foreach my $macro (keys %resource_macros) {
-            $command->{'command_line'} =~  s/\$$macro\$/\$$OPTION{'prefix'}$macro\$/g;
+
+        if ($OPTION{'prefix'} ne "") {
+            foreach my $macro (keys %resource_macros) {
+                $command->{'command_line'} =~  s/\$$macro\$/\$$OPTION{'prefix'}$macro\$/g;
+            }
         }
 
         if (defined($command->{'command_line'})) { push @{$clapi{CMD}}, "CMD;ADD;".$OPTION{'prefix'}.$command->{'command_name'}.";".$command_type.";".$command->{'command_line'} };
@@ -273,7 +275,14 @@ sub export_hosts {
             if (defined($host->{'check_command'})) {
                 my ($check_command, $check_command_arguments) = split('!', $host->{'check_command'}, 2);
                 if (defined($check_command) && $check_command ne "") { push @{$clapi{$type}}, $type.";setparam;".$prefix.$host->{'host_name'}.";check_command;".$OPTION{'prefix'}.$check_command };
-                if (defined($check_command_arguments) && $check_command_arguments ne "") { push @{$clapi{$type}}, $type.";setparam;".$prefix.$host->{'host_name'}.";check_command_arguments;!".$check_command_arguments };
+                if (defined($check_command_arguments) && $check_command_arguments ne "") {
+                    if ($OPTION{'prefix'} ne "") {
+                        foreach my $macro (keys %resource_macros) {
+                            $check_command_arguments =~  s/\$$macro\$/\$$OPTION{'prefix'}$macro\$/g;
+                        }
+                    }
+                    push @{$clapi{$type}}, $type.";setparam;".$prefix.$host->{'host_name'}.";check_command_arguments;!".$check_command_arguments
+                }
             }
             if (defined($host->{'check_interval'})) { push @{$clapi{$type}}, $type.";setparam;".$prefix.$host->{'host_name'}.";check_interval;".$host->{'check_interval'} };
             if (defined($host->{'normal_check_interval'})) { push @{$clapi{$type}}, $type.";setparam;".$prefix.$host->{'host_name'}.";check_interval;".$host->{'normal_check_interval'} };
@@ -304,7 +313,14 @@ sub export_hosts {
             if (defined($host->{'event_handler'})) {
                 my ($handler_command, $handler_command_arguments) = split('!', $host->{'event_handler'}, 2);
                 if (defined($handler_command) && $handler_command ne "") { push @{$clapi{$type}}, $type.";setparam;".$prefix.$host->{'host_name'}.";event_handler;".$OPTION{'prefix'}.$handler_command };
-                if (defined($handler_command_arguments) && $handler_command_arguments ne "") { push @{$clapi{$type}}, $type.";setparam;".$prefix.$host->{'host_name'}.";event_handler_arguments;!".$handler_command_arguments };
+                if (defined($handler_command_arguments) && $handler_command_arguments ne "") {
+                    if ($OPTION{'prefix'} ne "") {
+                        foreach my $macro (keys %resource_macros) {
+                            $handler_command_arguments =~  s/\$$macro\$/\$$OPTION{'prefix'}$macro\$/g;
+                        }
+                    }
+                    push @{$clapi{$type}}, $type.";setparam;".$prefix.$host->{'host_name'}.";event_handler_arguments;!".$handler_command_arguments
+                }
             }
             if (defined($host->{'icon_image'})) { push @{$clapi{$type}}, $type.";setparam;".$prefix.$host->{'host_name'}.";icon_image;".$host->{'icon_image'} };
             if (defined($host->{'icon_image_alt'})) { push @{$clapi{$type}}, $type.";setparam;".$prefix.$host->{'host_name'}.";icon_image_alt;".$host->{'icon_image_alt'} };
@@ -429,7 +445,14 @@ sub export_services {
             if (defined($service->{'check_command'})) {
                 my ($check_command, $check_command_arguments) = split('!', (ref $service->{'check_command'} eq "Nagios::Command") ? ${$service->{'check_command'}}{'command_name'} : $service->{'check_command'}, 2);
                 if (defined($check_command) && $check_command ne "") { push @{$clapi{STPL}}, "STPL;setparam;".$OPTION{'prefix'}.$service->{'name'}.";check_command;".$OPTION{'prefix'}.$check_command };
-                if (defined($check_command_arguments) && $check_command_arguments ne "") { push @{$clapi{STPL}}, "STPL;setparam;".$OPTION{'prefix'}.$service->{'name'}.";check_command_arguments;!".$check_command_arguments };
+                if (defined($check_command_arguments) && $check_command_arguments ne "") {
+                    if ($OPTION{'prefix'} ne "") {
+                        foreach my $macro (keys %resource_macros) {
+                            $check_command_arguments =~  s/\$$macro\$/\$$OPTION{'prefix'}$macro\$/g;
+                        }
+                    }
+                    push @{$clapi{STPL}}, "STPL;setparam;".$OPTION{'prefix'}.$service->{'name'}.";check_command_arguments;!".$check_command_arguments
+                }
             }
             if (defined($service->{'max_check_attempts'})) { push @{$clapi{STPL}}, "STPL;setparam;".$OPTION{'prefix'}.$service->{'name'}.";max_check_attempts;".$service->{'max_check_attempts'} };
             if (defined($service->{'check_interval'})) { push @{$clapi{STPL}}, "STPL;setparam;".$OPTION{'prefix'}.$service->{'name'}.";normal_check_interval;".$service->{'check_interval'} };
@@ -457,7 +480,14 @@ sub export_services {
             if (defined($service->{'event_handler'})) {
                 my ($handler_command, $handler_command_arguments) = split('!', (ref $service->{'event_handler'} eq "Nagios::Command") ? ${$service->{'event_handler'}}{'command_name'} : $service->{'event_handler'}, 2);
                 if (defined($handler_command) && $handler_command ne "") { push @{$clapi{STPL}}, "STPL;setparam;".$OPTION{'prefix'}.$service->{'name'}.";event_handler;".$OPTION{'prefix'}.$handler_command };
-                if (defined($handler_command_arguments) && $handler_command_arguments ne "") { push @{$clapi{STPL}}, "STPL;setparam;".$OPTION{'prefix'}.$service->{'name'}.";event_handler_arguments;!".$handler_command_arguments };
+                if (defined($handler_command_arguments) && $handler_command_arguments ne "") {
+                    if ($OPTION{'prefix'} ne "") {
+                        foreach my $macro (keys %resource_macros) {
+                            $handler_command_arguments =~  s/\$$macro\$/\$$OPTION{'prefix'}$macro\$/g;
+                        }
+                    }
+                    push @{$clapi{STPL}}, "STPL;setparam;".$OPTION{'prefix'}.$service->{'name'}.";event_handler_arguments;!".$handler_command_arguments
+                }
             }
             if (defined($service->{'event_handler_enabled'})) { push @{$clapi{STPL}}, "STPL;setparam;".$OPTION{'prefix'}.$service->{'name'}.";event_handler_enabled;".$service->{'event_handler_enabled'} };
             if (defined($service->{'notes'})) { push @{$clapi{STPL}}, "STPL;setparam;".$OPTION{'prefix'}.$service->{'name'}.";notes;".$service->{'notes'} };
@@ -501,7 +531,14 @@ sub export_services {
                 if (defined($service->{'check_command'})) {
                     my ($check_command, $check_command_arguments) = split('!', (ref $service->{'check_command'} eq "Nagios::Command") ? ${$service->{'check_command'}}{'command_name'} : $service->{'check_command'}, 2);
                     if (defined($check_command) && $check_command ne "") { push @{$clapi{SERVICE}}, "SERVICE;setparam;".$host.";".$service->{'service_description'}.";check_command;".$OPTION{'prefix'}.$check_command };
-                    if (defined($check_command_arguments) && $check_command_arguments ne "") { push @{$clapi{SERVICE}}, "SERVICE;setparam;".$host.";".$service->{'service_description'}.";check_command_arguments;!".$check_command_arguments };
+                    if (defined($check_command_arguments) && $check_command_arguments ne "") {
+                        if ($OPTION{'prefix'} ne "") {
+                        foreach my $macro (keys %resource_macros) {
+                            $check_command_arguments =~  s/\$$macro\$/\$$OPTION{'prefix'}$macro\$/g;
+                            }
+                        }
+                        push @{$clapi{SERVICE}}, "SERVICE;setparam;".$host.";".$service->{'service_description'}.";check_command_arguments;!".$check_command_arguments
+                    }
                 }
                 if (defined($service->{'max_check_attempts'})) { push @{$clapi{SERVICE}}, "SERVICE;setparam;".$host.";".$service->{'service_description'}.";max_check_attempts;".$service->{'max_check_attempts'} };
                 if (defined($service->{'check_interval'})) { push @{$clapi{SERVICE}}, "SERVICE;setparam;".$host.";".$service->{'service_description'}.";normal_check_interval;".$service->{'check_interval'} };
@@ -529,7 +566,14 @@ sub export_services {
                 if (defined($service->{'event_handler'})) {
                     my ($handler_command, $handler_command_arguments) = split('!', (ref $service->{'event_handler'} eq "Nagios::Command") ? ${$service->{'event_handler'}}{'command_name'} : $service->{'event_handler'}, 2);
                     if (defined($handler_command) && $handler_command ne "") { push @{$clapi{SERVICE}}, "SERVICE;setparam;".$host.";".$service->{'service_description'}.";event_handler;".$OPTION{'prefix'}.$handler_command };
-                    if (defined($handler_command_arguments) && $handler_command_arguments ne "") { push @{$clapi{SERVICE}}, "SERVICE;setparam;".$host.";".$service->{'service_description'}.";event_handler_arguments;!".$handler_command_arguments };
+                    if (defined($handler_command_arguments) && $handler_command_arguments ne "") {
+                        if ($OPTION{'prefix'} ne "") {
+                            foreach my $macro (keys %resource_macros) {
+                                $handler_command_arguments =~  s/\$$macro\$/\$$OPTION{'prefix'}$macro\$/g;
+                            }
+                        }
+                        push @{$clapi{SERVICE}}, "SERVICE;setparam;".$host.";".$service->{'service_description'}.";event_handler_arguments;!".$handler_command_arguments
+                    }
                 }
                 if (defined($service->{'event_handler_enabled'})) { push @{$clapi{SERVICE}}, "SERVICE;setparam;".$host.";".$service->{'service_description'}.";event_handler_enabled;".$service->{'event_handler_enabled'} };
                 if (defined($service->{'notes'})) { push @{$clapi{SERVICE}}, "SERVICE;setparam;".$host.";".$service->{'service_description'}.";notes;".$service->{'notes'} };
