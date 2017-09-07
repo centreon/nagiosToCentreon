@@ -33,7 +33,8 @@ my %OPTION = ("help"    => undef,
               "version" => '3',
               "poller"  => "Central",
               "prefix"  => "",
-              "config"  => "/usr/local/nagios/etc/");
+              "config"  => "/usr/local/nagios/etc/",
+              "swap"    => undef);
 
 #############################
 # Control command line args #
@@ -45,7 +46,8 @@ GetOptions(
     "V|version=s"   => \$OPTION{'version'},
     "P|poller=s"    => \$OPTION{'poller'},
     "p|prefix=s"    => \$OPTION{'prefix'},
-    "C|config=s"    => \$OPTION{'config'}
+    "C|config=s"    => \$OPTION{'config'},
+    "s|swap"        => \$OPTION{'swap'}
 );
 
 # Global vars
@@ -71,6 +73,7 @@ sub print_usage () {
     print "    -V (--version)     Nagios version of the configuration files (Default: 3)\n";
     print "    -P (--poller)      Name of the targeted poller (Default: Central)\n";
     print "    -p (--prefix)      Add a prefix before commands, contacts, templates, groups, etc.\n";
+    print "    -d (--swap)        Swap alias and name of contacts for the configurations that need it\n";
     print "    -h (--help)        Usage help\n";
 }
 
@@ -161,10 +164,11 @@ sub export_contacts {
     my @contacts_array = @_;
 
     foreach my $contact (@contacts_array) {
-        next if (!defined($contact->{'contact_name'}) || $contact->{'contact_name'} =~ m/centreon\-bam|\_Module\_BAM/);
+        next if (!defined($contact->{'alias'}) || !defined($contact->{'contact_name'}) || $contact->{'contact_name'} =~ m/centreon\-bam|\_Module\_BAM/);
 
-        if (defined($contact->{'alias'})) { $contact->{'alias'} =~ s/ /_/g };
-        if (defined($contact->{'contact_name'})) { push @{$clapi{CONTACT}}, "CONTACT;ADD;".$OPTION{'prefix'}.$contact->{'alias'}.";".$OPTION{'prefix'}.$contact->{'contact_name'}.";".((defined($contact->{'email'})) ? $contact->{'email'} : "").";".((defined($contact->{'pager'})) ? $contact->{'pager'} : "").";0;0;en_US;local" };
+        $contact->{'alias'} =~ s/ /_/g;
+        $contact->{'contact_name'} =~ s/ /_/g;
+        if (defined($contact->{'contact_name'})) { push @{$clapi{CONTACT}}, "CONTACT;ADD;".$contact->{'alias'}.";".$OPTION{'prefix'}.$contact->{'contact_name'}.";".((defined($contact->{'email'})) ? $contact->{'email'} : "").";".((defined($contact->{'pager'})) ? $contact->{'pager'} : "").";0;0;en_US;local" };
         if (defined($contact->{'host_notification_period'})) { push @{$clapi{CONTACT}}, "CONTACT;setparam;".$OPTION{'prefix'}.$contact->{'contact_name'}.";hostnotifperiod;". ((ref $contact->{'host_notification_period'} eq "Nagios::TimePeriod") ? $OPTION{'prefix'}.${$contact->{'host_notification_period'}}{'timeperiod_name'} : $OPTION{'prefix'}.$contact->{'host_notification_period'}) };
         if (defined($contact->{'service_notification_period'})) { push @{$clapi{CONTACT}}, "CONTACT;setparam;".$OPTION{'prefix'}.$contact->{'contact_name'}.";svcnotifperiod;". ((ref $contact->{'service_notification_period'} eq "Nagios::TimePeriod") ? $OPTION{'prefix'}.${$contact->{'service_notification_period'}}{'timeperiod_name'} : $OPTION{'prefix'}.$contact->{'service_notification_period'}) };
         if (defined($contact->{'host_notification_options'})) { push @{$clapi{CONTACT}}, "CONTACT;setparam;".$OPTION{'prefix'}.$contact->{'contact_name'}.";hostnotifopt;".((ref $contact->{'host_notification_options'} eq "ARRAY") ? join(",", @{$contact->{'host_notification_options'}}) : $contact->{'host_notification_options'}) };
@@ -195,6 +199,11 @@ sub export_contacts {
             } else {
                 push @{$contactgroups{$contact->{'contactgroups'}}}, $contact->{'contact_name'};
             }
+        }
+
+        if (!defined($OPTION{'swap'})) {
+            push @{$clapi{CONTACT_SWAP}}, "CONTACT;setparam;".$OPTION{'prefix'}.$contact->{'contact_name'}.";name;".$contact->{'contact_name'};
+            push @{$clapi{CONTACT_SWAP}}, "CONTACT;setparam;".$OPTION{'prefix'}.$contact->{'contact_name'}.";alias;".$OPTION{'prefix'}.$contact->{'alias'};
         }
     }
 }
@@ -735,5 +744,6 @@ foreach (@{$clapi{HG}}) { print $_, "\n" if ! $multi{$_}++ };
 foreach (@{$clapi{STPL}}) { print $_, "\n" if ! $multi{$_}++ };
 foreach (@{$clapi{SERVICE}}) { print $_, "\n" if ! $multi{$_}++ };
 foreach (@{$clapi{SG}}) { print $_, "\n" if ! $multi{$_}++ };
+foreach (@{$clapi{CONTACT_SWAP}}) { print $_, "\n" if ! $multi{$_}++ };
 
 exit 0;
