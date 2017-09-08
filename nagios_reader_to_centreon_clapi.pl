@@ -34,11 +34,8 @@ my %OPTION = ("help"    => undef,
               "poller"  => "Central",
               "prefix"  => "",
               "config"  => "/usr/local/nagios/etc/",
-              "swap"    => undef);
-
-#############################
-# Control command line args #
-#############################
+              "switch"  => undef,
+              "filter"  => '^(?!(\.|connector\.cfg))(.*\.cfg)$');
 
 Getopt::Long::Configure('bundling');
 GetOptions(
@@ -47,10 +44,9 @@ GetOptions(
     "P|poller=s"    => \$OPTION{'poller'},
     "p|prefix=s"    => \$OPTION{'prefix'},
     "C|config=s"    => \$OPTION{'config'},
-    "s|swap"        => \$OPTION{'swap'}
-);
+    "s|switch"      => \$OPTION{'switch'},
+    "f|filter=s"    => \$OPTION{'filter'});
 
-# Global vars
 my $objects;
 my %clapi;
 my %contactgroups;
@@ -59,10 +55,6 @@ my %servicegroups;
 my %host_exported;
 my %service_exported;
 my %resource_macros;
-
-#############
-# Functions #
-#############
 
 sub print_usage () {
     print "Version: ";
@@ -73,7 +65,7 @@ sub print_usage () {
     print "    -V (--version)     Nagios version of the configuration files (Default: 3)\n";
     print "    -P (--poller)      Name of the targeted poller (Default: Central)\n";
     print "    -p (--prefix)      Add a prefix before commands, contacts, templates, groups, etc.\n";
-    print "    -s (--swap)        Swap alias and name of contacts for the configurations that need it\n";
+    print "    -s (--switch)      Switch alias and name of contacts for the configurations that need it\n";
     print "    -h (--help)        Usage help\n";
 }
 
@@ -111,7 +103,6 @@ sub export_resources {
 
         foreach my $macro (keys %resource_macros) {
             push @{$clapi{RESOURCECFG}}, "RESOURCECFG;ADD;\$".$OPTION{'prefix'}.$macro."\$;".$resource_macros{$macro}.";".$OPTION{'poller'}.";Resource \$".$macro."\$";
-            #push @{$clapi{RESOURCECFG}}, "RESOURCECFG;setparam;\$".$OPTION{'prefix'}.$macro."\$;activate;1";
         }
     }
 }
@@ -201,9 +192,9 @@ sub export_contacts {
             }
         }
 
-        if (!defined($OPTION{'swap'})) {
-            push @{$clapi{CONTACT_SWAP}}, "CONTACT;setparam;".$OPTION{'prefix'}.$contact->{'contact_name'}.";name;".$contact->{'contact_name'};
-            push @{$clapi{CONTACT_SWAP}}, "CONTACT;setparam;".$OPTION{'prefix'}.$contact->{'contact_name'}.";alias;".$OPTION{'prefix'}.$contact->{'alias'};
+        if (!defined($OPTION{'switch'})) {
+            push @{$clapi{CONTACT_SWITCH}}, "CONTACT;setparam;".$OPTION{'prefix'}.$contact->{'contact_name'}.";name;".$contact->{'contact_name'};
+            push @{$clapi{CONTACT_SWITCH}}, "CONTACT;setparam;".$OPTION{'prefix'}.$contact->{'contact_name'}.";alias;".$OPTION{'prefix'}.$contact->{'alias'};
         }
     }
 }
@@ -725,8 +716,9 @@ $objects = Nagios::Object::Config->new(Version => $OPTION{'version'});
 
 opendir (DIR, $OPTION{'config'}) or die $!;
 while (my $file = readdir(DIR)) {
-    next if ($file =~ m/^connectors.cfg$|^\./ || $file !~ m/\.cfg$/);
-    $objects->parse($OPTION{'config'}."/".$file);
+    if ($file =~ m/$OPTION{'filter'}/) {
+        $objects->parse($OPTION{'config'}."/".$file);
+    }
 }
 closedir DIR;
 
@@ -753,6 +745,6 @@ foreach (@{$clapi{HG}}) { print $_, "\n" if ! $multi{$_}++ };
 foreach (@{$clapi{STPL}}) { print $_, "\n" if ! $multi{$_}++ };
 foreach (@{$clapi{SERVICE}}) { print $_, "\n" if ! $multi{$_}++ };
 foreach (@{$clapi{SG}}) { print $_, "\n" if ! $multi{$_}++ };
-foreach (@{$clapi{CONTACT_SWAP}}) { print $_, "\n" if ! $multi{$_}++ };
+foreach (@{$clapi{CONTACT_SWITCH}}) { print $_, "\n" if ! $multi{$_}++ };
 
 exit 0;
