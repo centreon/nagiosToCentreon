@@ -66,7 +66,7 @@ sub print_usage () {
     print "    -P (--poller)      Name of the targeted poller (Default: Central)\n";
     print "    -p (--prefix)      Add a prefix before commands, contacts, templates, groups, etc.\n";
     print "    -s (--switch)      Switch alias and name of contacts for the configurations that need it\n";
-    print "    -f (--filter)      Filter files to process with regexp (Default: ^(?!(\.|connector\.cfg))(.*\.cfg)$)\n";
+    print "    -f (--filter)      Filter files to process with regexp (Default: '^(?!(\\.|connector\\.cfg))(.*\\.cfg)\$\'\)\n";
     print "    -h (--help)        Usage help\n";
 }
 
