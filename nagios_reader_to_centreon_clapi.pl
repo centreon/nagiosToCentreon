@@ -414,8 +414,17 @@ sub export_hostgroups {
                         $hostgroups_exported{$host} = 1;
                     }
                 }
+            } elsif ($hostgroup->{'members'} eq "*") {
+                foreach my $host (@{$objects->{host_list}}) {
+                    if (defined($host->{'host_name'}) && ($host->{'host_name'} !~ m/\_Module\_BAM|\_Module\_Meta/) && defined($host_exported{$host->{'host_name'}})) {
+                        if (defined($host->register) && $host->register == 1 && defined($host->{'address'})) {
+                            push @{$clapi{HG}}, "HG;addhost;".$OPTION{'prefix'}.$hostgroup->{'hostgroup_name'}.";".$host->{'host_name'};
+                            $hostgroups_exported{$host->{'host_name'}} = 1;
+                        }
+                    }
+                }
             } else {
-                push @{$clapi{HG}}, "HG;addhost;".$OPTION{'prefix'}.$hostgroup->{'hostgroup_name'}.";".$OPTION{'prefix'}.$hostgroup->{'members'};
+                push @{$clapi{HG}}, "HG;addhost;".$OPTION{'prefix'}.$hostgroup->{'hostgroup_name'}.";".$hostgroup->{'members'};
                 $hostgroups_exported{$hostgroup->{'members'}} = 1;
             }
         }
