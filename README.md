@@ -43,7 +43,8 @@ To display help use the command:
         -V (--version)     Nagios version of the configuration files (Default: 3)
         -P (--poller)      Name of the targeted poller (Default: Central)
         -p (--prefix)      Add a prefix before commands, contacts, templates, groups, etc.
-        -s (--swap)        Swap alias and name of contacts for the configurations that need it
+        -s (--switch)      Switch alias and name of contacts for the configurations that need it
+        -f (--filter)      Filter files to process with regexp (Default: '^(?!(\.|connector\.cfg))(.*\.cfg)$')
         -h (--help)        Usage help
 
 To run the script please use the following command:
@@ -61,3 +62,4 @@ Run the following command to import configuration into Centreon on your Centreon
 - Services by hostgroups will be transformed : a template of 
 service will be created using old service definition, and a unitary service will be created for all hosts linked to the hostgroup using the newly created service template.
 - Hostgroups exclusions (i.e. hostgroup_name !Windows) won't be taken into account.
+- Using filters may provoque errors at CLAPI import because of the contacts definition on several objects being the full name instead of the login/alias as CLAPI intend it to be.
