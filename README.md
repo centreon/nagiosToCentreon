@@ -29,12 +29,6 @@ Note : perl-List-Compare is from EPEL repo for CentOS/Red Hat
 
 ## Usage
 
-On a fresh Centreon server the default poller is named "Central". If you rename it
-or if you want to link this Nagios configuration to a predifined poller you 
-have to change the poller name on line 65
-
-    my $default_poller = "Central";
-
 To display help use the command:
 
     $ perl nagios_reader_to_centreon_clapi.pl --help
@@ -43,20 +37,19 @@ To display help use the command:
     #    Bugs to http://github.com/nagiosToCentreon      #
     ######################################################
     
+    Version: 3.0.0
     Usage: nagios_reader_to_centreon_clapi.pl
-        -V (--version)     Show script version
+        -C (--config)      Path to nagios configuration files (must be a directory) (Default: /usr/local/nagios/etc/)
+        -V (--version)     Nagios version of the configuration files (Default: 3)
+        -P (--poller)      Name of the targeted poller (Default: Central)
+        -p (--prefix)      Add a prefix before commands, contacts, templates, groups, etc.
+        -s (--switch)      Switch alias and name of contacts for the configurations that need it
+        -f (--filter)      Filter files to process with regexp (Default: '^(?!(\.|connector\.cfg))(.*\.cfg)$')
         -h (--help)        Usage help
-        -C (--config)      Path to nagios.cfg file
-		-S (--servcies-hg) To keep services by hostgroups definition
-
-Note : By default services by hostgroups will be transformed. A template of 
-service will be created using old service definition and a unitary service by 
-host (for all hosts linked to the hostgroup) will be created linked to the 
-previous service template.
 
 To run the script please use the following command:
 
-    $ perl nagios_reader_to_centreon_clapi.pl --config /usr/local/nagios/etc/nagios.cfg > /tmp/centreon_clapi_import_commands.txt
+    $ perl nagios_reader_to_centreon_clapi.pl --config /usr/local/nagios/etc/ > /tmp/centreon_clapi_import_commands.txt
 
 Export the file /tmp/centreon_clapi_import_commands.txt on your Centreon server.
 
@@ -64,3 +57,9 @@ Run the following command to import configuration into Centreon on your Centreon
 
     $ /usr/share/centreon/bin/centreon -u admin -p @PASSWORD -i /tmp/centreon_clapi_import_commands.txt
 
+## Notes
+
+- Services by hostgroups will be transformed : a template of 
+service will be created using old service definition, and a unitary service will be created for all hosts linked to the hostgroup using the newly created service template.
+- Hostgroups exclusions (i.e. hostgroup_name !Windows) won't be taken into account.
+- Using filters may provoque errors at CLAPI import because of the contacts definition on several objects being the full name instead of the login/alias as CLAPI intend it to be.
