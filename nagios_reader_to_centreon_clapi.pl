@@ -35,17 +35,21 @@ my %OPTION = ("help"    => undef,
               "prefix"  => "",
               "config"  => "/usr/local/nagios/etc/",
               "switch"  => undef,
-              "filter"  => '^(?!(\.|connector\.cfg))(.*\.cfg)$');
+              "filter"  => '^(?!(\.|connector\.cfg))(.*\.cfg)$',
+              "default_htpl"  => "",
+              "default_stpl"  => "");
 
 Getopt::Long::Configure('bundling');
 GetOptions(
-    "h|help"        => \$OPTION{'help'},
-    "V|version=s"   => \$OPTION{'version'},
-    "P|poller=s"    => \$OPTION{'poller'},
-    "p|prefix=s"    => \$OPTION{'prefix'},
-    "C|config=s"    => \$OPTION{'config'},
-    "s|switch"      => \$OPTION{'switch'},
-    "f|filter=s"    => \$OPTION{'filter'});
+    "h|help"                => \$OPTION{'help'},
+    "V|version=s"           => \$OPTION{'version'},
+    "P|poller=s"            => \$OPTION{'poller'},
+    "p|prefix=s"            => \$OPTION{'prefix'},
+    "C|config=s"            => \$OPTION{'config'},
+    "s|switch"              => \$OPTION{'switch'},
+    "f|filter=s"            => \$OPTION{'filter'},
+    "default-htpl=s"        => \$OPTION{'default_htpl'},
+    "default-stpl=s"        => \$OPTION{'default_stpl'});
 
 my $objects;
 my %clapi;
@@ -67,6 +71,8 @@ sub print_usage () {
     print "    -p (--prefix)      Add a prefix before commands, contacts, templates, groups, etc.\n";
     print "    -s (--switch)      Switch alias and name of contacts for the configurations that need it\n";
     print "    -f (--filter)      Filter files to process with regexp (Default: '^(?!(\\.|connector\\.cfg))(.*\\.cfg)\$\'\)\n";
+    print "    --default-htpl     Define default host template for template-less hosts or host templates\n";
+    print "    --default-stpl     Define default service template for template-less services or service templates\n";
     print "    -h (--help)        Usage help\n";
 }
 
@@ -263,10 +269,10 @@ sub export_hosts {
             
             if (!defined($host->register) || $host->register == 0 || !defined($host->{'address'})) {
                 $type = "HTPL";
-                push @{$clapi{$type}}, "HTPL;ADD;".$prefix.$host->{'host_name'}.";".(defined($host->{'alias'}) ? $host->{'alias'} : $host->{'host_name'}).";;".((@templates) ? join("|", (my @template = map { $OPTION{'prefix'}.$_ } @templates)) : "generic-active-host-custom").";;";
+                push @{$clapi{$type}}, "HTPL;ADD;".$prefix.$host->{'host_name'}.";".(defined($host->{'alias'}) ? $host->{'alias'} : $host->{'host_name'}).";;".((@templates) ? join("|", (my @template = map { $OPTION{'prefix'}.$_ } @templates)) : $OPTION{'default_htpl'}).";;";
                 
             } else {
-                push @{$clapi{$type}}, "HOST;ADD;".$host->{'host_name'}.";".(defined($host->{'alias'}) ? $host->{'alias'} : $host->{'host_name'}).";".$host->{'address'}.";".((@templates) ? join("|", (my @template = map { $OPTION{'prefix'}.$_ } @templates)) : "generic-active-host-custom").";".$OPTION{'poller'}.";";
+                push @{$clapi{$type}}, "HOST;ADD;".$host->{'host_name'}.";".(defined($host->{'alias'}) ? $host->{'alias'} : $host->{'host_name'}).";".$host->{'address'}.";".((@templates) ? join("|", (my @template = map { $OPTION{'prefix'}.$_ } @templates)) : $OPTION{'default_htpl'}).";".$OPTION{'poller'}.";";
                 $prefix = "";
             }
             if (defined($host->{'2d_coords'})) { push @{$clapi{$type}}, $type.";setparam;".$prefix.$host->{'host_name'}.";2d_coords;".$host->{'2d_coords'} };
@@ -449,7 +455,7 @@ sub export_services {
                 $service->{'name'} = "Service-By-Hg-".$service->{'service_description'};
             }
 
-            if (defined($service->{'name'})) { push @{$clapi{STPL}}, "STPL;ADD;".$OPTION{'prefix'}.$service->{'name'}.";".$service->{'service_description'}.";".(defined($service->{'use'}) ? $OPTION{'prefix'}.$service->{'use'} : "generic-active-service-custom") };
+            if (defined($service->{'name'})) { push @{$clapi{STPL}}, "STPL;ADD;".$OPTION{'prefix'}.$service->{'name'}.";".$service->{'service_description'}.";".(defined($service->{'use'}) ? $OPTION{'prefix'}.$service->{'use'} : $OPTION{'default_stpl'}) };
             if (defined($service->{'is_volatile'})) { push @{$clapi{STPL}}, "STPL;setparam;".$OPTION{'prefix'}.$service->{'name'}.";is_volatile;".$service->{'is_volatile'} };
             if (defined($service->{'check_period'})) { push @{$clapi{STPL}}, "STPL;setparam;".$OPTION{'prefix'}.$service->{'name'}.";check_period;".((ref $service->{'check_period'} eq "Nagios::TimePeriod") ? $OPTION{'prefix'}.${$service->{'check_period'}}{'timeperiod_name'} : $OPTION{'prefix'}.$service->{'check_period'}) };
             if (defined($service->{'check_command'})) {
@@ -535,7 +541,7 @@ sub export_services {
             if (not ref $service->{'host_name'}) { push @hosts, $service->{'host_name'} };
             
             foreach my $host (@hosts) {
-                if (defined($service->{'service_description'})) { push @{$clapi{SERVICE}}, "SERVICE;ADD;".$host.";".$service->{'service_description'}.";".(defined($service->{'use'}) ? $OPTION{'prefix'}.$service->{'use'} : "generic-active-service-custom") };
+                if (defined($service->{'service_description'})) { push @{$clapi{SERVICE}}, "SERVICE;ADD;".$host.";".$service->{'service_description'}.";".(defined($service->{'use'}) ? $OPTION{'prefix'}.$service->{'use'} : $OPTION{'default_stpl'}) };
                 if (defined($service->{'is_volatile'})) { push @{$clapi{SERVICE}}, "SERVICE;setparam;".$host.";".$service->{'service_description'}.";is_volatile;".$service->{'is_volatile'} };
                 if (defined($service->{'check_period'})) { push @{$clapi{SERVICE}}, "SERVICE;setparam;".$host.";".$service->{'service_description'}.";check_period;".((ref $service->{'check_period'} eq "Nagios::TimePeriod") ? $OPTION{'prefix'}.${$service->{'check_period'}}{'timeperiod_name'} : $OPTION{'prefix'}.$service->{'check_period'}) };
                 if (defined($service->{'check_command'})) {
