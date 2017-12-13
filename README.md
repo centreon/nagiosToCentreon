@@ -45,6 +45,8 @@ To display help use the command:
         -p (--prefix)      Add a prefix before commands, contacts, templates, groups, etc.
         -s (--switch)      Switch alias and name of contacts for the configurations that need it
         -f (--filter)      Filter files to process with regexp (Default: '^(?!(\.|connector\.cfg))(.*\.cfg)$')
+        --default-htpl     Define default host template for template-less hosts or host templates\n";
+        --default-stpl     Define default service template for template-less services or service templates\n";
         -h (--help)        Usage help
 
 To run the script please use the following command:
