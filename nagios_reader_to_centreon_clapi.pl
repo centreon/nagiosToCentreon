@@ -559,10 +559,6 @@ sub export_services {
             if (not ref $service->{'host_name'}) { push @hosts, $service->{'host_name'} };
             
             foreach my $host (@hosts) {
-                if ($OPTION{'default_stpl'} eq $service->{'service_description'}) {
-                    $default_stpl = "";
-                }
-
                 if (defined($service->{'service_description'})) { push @{$clapi{SERVICE}}, "SERVICE;ADD;".$host.";".$service->{'service_description'}.";".(defined($service->{'use'}) ? $OPTION{'prefix'}.$service->{'use'} : $default_stpl) };
                 if (defined($service->{'is_volatile'})) { push @{$clapi{SERVICE}}, "SERVICE;setparam;".$host.";".$service->{'service_description'}.";is_volatile;".$service->{'is_volatile'} };
                 if (defined($service->{'check_period'})) { push @{$clapi{SERVICE}}, "SERVICE;setparam;".$host.";".$service->{'service_description'}.";check_period;".((ref $service->{'check_period'} eq "Nagios::TimePeriod") ? $OPTION{'prefix'}.${$service->{'check_period'}}{'timeperiod_name'} : $OPTION{'prefix'}.$service->{'check_period'}) };
