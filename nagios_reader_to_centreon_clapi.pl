@@ -170,7 +170,7 @@ sub export_contacts {
         if (defined($contact->{'host_notification_period'})) { push @{$clapi{CONTACT}}, "CONTACT;setparam;".$OPTION{'prefix'}.$contact->{'contact_name'}.";hostnotifperiod;". ((ref $contact->{'host_notification_period'} eq "Nagios::TimePeriod") ? $OPTION{'prefix'}.${$contact->{'host_notification_period'}}{'timeperiod_name'} : $OPTION{'prefix'}.$contact->{'host_notification_period'}) };
         if (defined($contact->{'service_notification_period'})) { push @{$clapi{CONTACT}}, "CONTACT;setparam;".$OPTION{'prefix'}.$contact->{'contact_name'}.";svcnotifperiod;". ((ref $contact->{'service_notification_period'} eq "Nagios::TimePeriod") ? $OPTION{'prefix'}.${$contact->{'service_notification_period'}}{'timeperiod_name'} : $OPTION{'prefix'}.$contact->{'service_notification_period'}) };
         if (defined($contact->{'host_notification_options'})) { push @{$clapi{CONTACT}}, "CONTACT;setparam;".$OPTION{'prefix'}.$contact->{'contact_name'}.";hostnotifopt;".((ref $contact->{'host_notification_options'} eq "ARRAY") ? join(",", @{$contact->{'host_notification_options'}}) : $contact->{'host_notification_options'}) };
-		if (defined($contact->{'service_notification_options'})) { push @{$clapi{CONTACT}}, "CONTACT;setparam;".$OPTION{'prefix'}.$contact->{'contact_name'}.";servicenotifopt;".((ref $contact->{'service_notification_options'} eq "ARRAY") ? join(",", @{$contact->{'service_notification_options'}}) : $contact->{'service_notification_options'}) };
+	if (defined($contact->{'service_notification_options'})) { push @{$clapi{CONTACT}}, "CONTACT;setparam;".$OPTION{'prefix'}.$contact->{'contact_name'}.";servicenotifopt;".((ref $contact->{'service_notification_options'} eq "ARRAY") ? join(",", @{$contact->{'service_notification_options'}}) : $contact->{'service_notification_options'}) };
         if (defined($contact->{'host_notifications_enabled'})) { push @{$clapi{CONTACT}}, "CONTACT;setparam;".$OPTION{'prefix'}.$contact->{'contact_name'}.";contact_enable_notifications;".$contact->{'host_notifications_enabled'} };
         if (defined($contact->{'host_notification_commands'})) { push @{$clapi{CONTACT}}, "CONTACT;setparam;".$OPTION{'prefix'}.$contact->{'contact_name'}.";hostnotifcmd;".((ref $contact->{'host_notification_commands'} eq "ARRAY") ? join("|", (my @hostnotifcmd = map { $OPTION{'prefix'}.$_ } @{$contact->{'host_notification_commands'}})) : $OPTION{'prefix'}.$contact->{'host_notification_commands'}) };
         if (defined($contact->{'service_notification_commands'})) { push @{$clapi{CONTACT}}, "CONTACT;setparam;".$OPTION{'prefix'}.$contact->{'contact_name'}.";svcnotifcmd;".((ref $contact->{'service_notification_commands'} eq "ARRAY") ? join("|", (my @hostnotifcmd = map { $OPTION{'prefix'}.$_ } @{$contact->{'service_notification_commands'}})) : $OPTION{'prefix'}.$contact->{'service_notification_commands'}) };
@@ -308,7 +308,7 @@ sub export_hosts {
             if (defined($host->{'action_url'})) { push @{$clapi{$type}}, $type.";setparam;".$prefix.$host->{'host_name'}.";action_url;".$host->{'action_url'} };
             if (defined($host->{'notifications_enabled'})) { push @{$clapi{$type}}, $type.";setparam;".$prefix.$host->{'host_name'}.";notifications_enabled;".$host->{'notifications_enabled'} };
             if (defined($host->{'notification_interval'})) { push @{$clapi{$type}}, $type.";setparam;".$prefix.$host->{'host_name'}.";notification_interval;".$host->{'notification_interval'} };
-		    if (defined($host->{'notification_options'})) { push @{$clapi{$type}}, $type.";setparam;".$prefix.$host->{'host_name'}.";notification_options;".((ref $host->{'notification_options'} eq "ARRAY") ? join(",", @{$host->{'notification_options'}}) : $host->{'notification_options'}) };
+            if (defined($host->{'notification_options'})) { push @{$clapi{$type}}, $type.";setparam;".$prefix.$host->{'host_name'}.";notification_options;".((ref $host->{'notification_options'} eq "ARRAY") ? join(",", @{$host->{'notification_options'}}) : $host->{'notification_options'}) };
             if (defined($host->{'notification_period'})) {push @{$clapi{$type}}, $type.";setparam;".$prefix.$host->{'host_name'}.";notification_period;".((ref $host->{'notification_period'} eq "Nagios::TimePeriod") ? $OPTION{'prefix'}.${$host->{'notification_period'}}{'timeperiod_name'} : $OPTION{'prefix'}.$host->{'notification_period'}) };
             if (defined($host->{'obsess_over_host'})) { push @{$clapi{$type}}, $type.";setparam;".$prefix.$host->{'host_name'}.";obsess_over_host;".$host->{'obsess_over_host'} };
             if (defined($host->{'passive_checks_enabled'})) { push @{$clapi{$type}}, $type.";setparam;".$prefix.$host->{'host_name'}.";passive_checks_enabled;".$host->{'passive_checks_enabled'} };
@@ -343,7 +343,7 @@ sub export_hosts {
 
             # Add parents
             if (defined($host->{'parents'})) {
-                if (ref defined($host->{'parents'})) {
+                if (ref $host->{'parents'}) {
                     foreach my $parent (@{$host->{'parents'}}) {
                         if (!defined($host_exported{$parent})) { export_hosts($objects->find_object($parent, "Nagios::Host")) };
                     }
