@@ -347,7 +347,7 @@ sub export_hosts {
                     foreach my $parent (@{$host->{'parents'}}) {
                         if (!defined($host_exported{$parent})) { export_hosts($objects->find_object($parent, "Nagios::Host")) };
                     }
-                    push @{$clapi{$type}}, $type.";setparent;".$prefix.$host->{'host_name'}.";".(join("|", (my @parents = map { $_->name } @{$host->{'parents'}})))
+                    push @{$clapi{$type}}, $type.";setparent;".$prefix.$host->{'host_name'}.";".(join("|", (my @parents = map { $_ } @{$host->{'parents'}})))
                 } else {
                     if (!defined($host_exported{$host->{'parents'}})) { export_hosts($objects->find_object($host->{'parents'}, "Nagios::Host")) };
                     push @{$clapi{$type}}, $type.";setparent;".$prefix.$host->{'host_name'}.";".$host->{'parents'};
