@@ -121,7 +121,7 @@ sub export_commands {
 
     foreach my $command (@commands_array) {
         next if (!defined($command->{'command_name'}) || $command->{'command_name'} =~ m/bam|check_meta|meta_notify/ || !defined($command->{'command_line'}));
-        
+
         my $command_type = "check";
         if ($command->{'command_name'} =~ m/notify/) {
             $command_type = "notif";
@@ -188,7 +188,7 @@ sub export_contacts {
             $contact->{'timezone'} =~ s/://g;
             push @{$clapi{CONTACT}}, "CONTACT;setparam;".$OPTION{'prefix'}.$contact->{'contact_name'}.";timezone;".$contact->{'timezone'};
         }
-        
+
         # Add contact to contactgroups
         if (defined($contact->{'contactgroups'})) {
             if (ref $contact->{'contactgroups'}) {
@@ -234,7 +234,7 @@ sub export_contactgroups {
                 $contacts_exported{$contactgroup->{'members'}} = 1;
             }
         }
-        
+
         # Loop to add contacts from contact definition
         if (defined($contactgroups{$contactgroup->{'contactgroup_name'}} )) {
             foreach my $contact (@{$contactgroups{$contactgroup->{'contactgroup_name'}}}) {
@@ -271,14 +271,13 @@ sub export_hosts {
             if ($default_htpl ne "" && $prefix ne "") {
                 $default_htpl = $prefix.$default_htpl;
             }
-            
+
             if (!defined($host->register) || $host->register == 0 || !defined($host->{'address'})) {
                 $type = "HTPL";
                 if ($OPTION{'default_htpl'} eq $host->{'host_name'}) {
                     $default_htpl = "";
                 }
                 push @{$clapi{$type}}, "HTPL;ADD;".$prefix.$host->{'host_name'}.";".(defined($host->{'alias'}) ? $host->{'alias'} : $host->{'host_name'}).";;".((@templates) ? join("|", (my @template = map { $OPTION{'prefix'}.$_ } @templates)) : $default_htpl).";;";
-                
             } else {
                 push @{$clapi{$type}}, "HOST;ADD;".$host->{'host_name'}.";".(defined($host->{'alias'}) ? $host->{'alias'} : $host->{'host_name'}).";".$host->{'address'}.";".((@templates) ? join("|", (my @template = map { $OPTION{'prefix'}.$_ } @templates)) : $default_htpl).";".$OPTION{'poller'}.";";
                 $prefix = "";
@@ -361,7 +360,7 @@ sub export_hosts {
                     push @{$clapi{$type}}, $type.";setparent;".$prefix.$host->{'host_name'}.";".$host->{'parents'};
                 }
             }
-            
+
             # Macros handling
             foreach my $macro ($host->list_attributes()) {
                 if ($macro =~ m/^_/ && $macro !~ m/SNMP|HOST_ID/ && defined($host->{$macro})) {
@@ -401,7 +400,7 @@ sub export_hosts {
 
 # Export Nagios hostgroups using Centreon CLAPI format
 sub export_hostgroups {
-    my @hostgroups_array = @_ ; 
+    my @hostgroups_array = @_ ;
 
     foreach my $hostgroup (@hostgroups_array) {
         next if (!defined($hostgroup->{'hostgroup_name'}) || $hostgroup->{'hostgroup_name'} =~ m/centreon\-bam\-contactgroup|\_Module\_BAM/);
@@ -464,7 +463,7 @@ sub export_services {
             if (defined($service->{'use'})) {
                 export_services($objects->find_object($service->{'use'}, "Nagios::Service"));
             }
-            
+
             # Create template of service for services by hostgroups
             if (defined($service->{'hostgroup_name'})) {
                 $service->{'name'} = "Service-By-Hg-".$service->{'service_description'};
@@ -532,7 +531,7 @@ sub export_services {
             if (defined($service->{'icon_image'})) { push @{$clapi{STPL}}, "STPL;setparam;".$OPTION{'prefix'}.$service->{'name'}.";icon_image;".$service->{'icon_image'} };
             if (defined($service->{'icon_image_alt'})) { push @{$clapi{STPL}}, "STPL;setparam;".$OPTION{'prefix'}.$service->{'name'}.";icon_image_alt;".$service->{'icon_image_alt'} };
             if (defined($service->{'recovery_notification_delay'})) { push @{$clapi{STPL}}, "STPL;setparam;".$OPTION{'prefix'}.$service->{'name'}.";recovery_notification_delay;".$service->{'recovery_notification_delay'} };
-        
+
             # Custom macros handling
             foreach my $macro ($service->list_attributes()) {
                 if ($macro =~ m/^_/ && $macro !~ m/SERVICE_ID/ && defined($service->{$macro})) {
@@ -540,7 +539,7 @@ sub export_services {
                     push @{$clapi{STPL}}, "STPL;setmacro;".$OPTION{'prefix'}.$service->{'name'}.";".$macro.";".$service->{"_".$macro}.";0;";
                 }
             }
-            
+
             # Add contactgroups to service
             if (defined($service->{'contact_groups'})) {
                 if (ref $service->{'contact_groups'}) { push @{$clapi{STPL}}, "STPL;setcontactgroup;".$OPTION{'prefix'}.$service->{'name'}.";".(join("|", (my @contactgroups = map { (ref $_ ne "Nagios::ContactGroup") ? $OPTION{'prefix'}.$_ : $OPTION{'prefix'}.$_->{'contactgroup_name'} } @{$service->{'contact_groups'}}))) };
@@ -558,7 +557,7 @@ sub export_services {
             my @hosts;
             if (ref $service->{'host_name'}) { @hosts = @{$service->{'host_name'}} };
             if (not ref $service->{'host_name'}) { push @hosts, $service->{'host_name'} };
-            
+
             foreach my $host (@hosts) {
                 if (defined($service->{'service_description'})) { push @{$clapi{SERVICE}}, "SERVICE;ADD;".$host.";".$service->{'service_description'}.";".(defined($service->{'use'}) ? $OPTION{'prefix'}.$service->{'use'} : $default_stpl) };
                 if (defined($service->{'is_volatile'})) { push @{$clapi{SERVICE}}, "SERVICE;setparam;".$host.";".$service->{'service_description'}.";is_volatile;".$service->{'is_volatile'} };
@@ -618,7 +617,7 @@ sub export_services {
                 if (defined($service->{'icon_image'})) { push @{$clapi{SERVICE}}, "SERVICE;setparam;".$host.";".$service->{'service_description'}.";icon_image;".$service->{'icon_image'} };
                 if (defined($service->{'icon_image_alt'})) { push @{$clapi{SERVICE}}, "SERVICE;setparam;".$host.";".$service->{'service_description'}.";icon_image_alt;".$service->{'icon_image_alt'} };
                 if (defined($service->{'recovery_notification_delay'})) { push @{$clapi{SERVICE}}, "SERVICE;setparam;".$host.";".$service->{'service_description'}.";recovery_notification_delay;".$service->{'recovery_notification_delay'} };
-            
+
                 # Custom macros handling
                 foreach my $macro ($service->list_attributes()) {
                     if ($macro =~ m/^_/ && $macro !~ m/SERVICE_ID/ && defined($service->{$macro})) {
@@ -638,7 +637,7 @@ sub export_services {
                     if (ref $service->{'contacts'}) { push @{$clapi{SERVICE}}, "SERVICE;setcontact;".$host.";".$service->{'service_description'}.";".(join("|", (my @contactgroups = map { (ref $_ ne "Nagios::Contact") ? $OPTION{'prefix'}.$_ : $OPTION{'prefix'}.$_->{'contact_name'} } @{$service->{'contacts'}}))) };
                     if (not ref $service->{'contacts'}) { push @{$clapi{SERVICE}}, "SERVICE;setcontact;".$host.";".$service->{'service_description'}.";".$OPTION{'prefix'}.$service->{'contacts'} };
                 }
-                
+
                 # Add service to servicegroups
                 if (defined($service->{'servicegroups'})) {
                     if (ref $service->{'servicegroups'}) {
@@ -651,7 +650,7 @@ sub export_services {
                 }
             }
         }
-        
+
         # Deploy services based on previous template on all hosts linked to hostgroup
         if (defined($service->{'hostgroup_name'})) {
             if (ref $service->{'hostgroup_name'}) {
@@ -703,9 +702,9 @@ sub export_servicegroups {
 
     foreach my $servicegroup (@servicegroups_array) {
         next if (!defined($servicegroup->{'servicegroup_name'}) || $servicegroup->{'servicegroup_name'} =~ m/centreon\-bam\-contactgroup|\_Module\_BAM/);
-     
+
         my (%services_exported, $host_name, $service_description);
-     
+
         push @{$clapi{SG}}, "SG;ADD;".$OPTION{'prefix'}.$servicegroup->{'servicegroup_name'}.";".$servicegroup->{'alias'};
         push @{$clapi{SG}}, "SG;setparam;".$OPTION{'prefix'}.$servicegroup->{'servicegroup_name'}.";sg_activate;1";
 
