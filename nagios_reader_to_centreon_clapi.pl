@@ -102,7 +102,8 @@ sub export_resources {
         open(my $fh, '<', $OPTION{'config'}."/resource.cfg") or die "Can't open $OPTION{'config'}/resource.cfg: $!";
         while (my $line = <$fh>) {
             chomp $line;
-            my ($macro, $value) = split('=', $line, 2) if ($line =~ /=/);
+            my ($macro, $value);
+            ($macro, $value) = split('=', $line, 2) if ($line =~ /=/);
             $macro =~ s/\$//g if defined($macro);
             $resource_macros{$macro} = $value if (defined($macro) && defined($value));
         }
