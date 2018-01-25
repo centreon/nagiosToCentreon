@@ -300,6 +300,8 @@ sub export_hosts {
             }
             if (defined($host->{'check_interval'})) { push @{$clapi{$type}}, $type.";setparam;".$prefix.$host->{'host_name'}.";check_interval;".$host->{'check_interval'} };
             if (defined($host->{'normal_check_interval'})) { push @{$clapi{$type}}, $type.";setparam;".$prefix.$host->{'host_name'}.";check_interval;".$host->{'normal_check_interval'} };
+            if (defined($host->{'retry_interval'})) { push @{$clapi{$type}}, $type.";setparam;".$prefix.$host->{'host_name'}.";retry_check_interval;".$host->{'retry_interval'} };
+            if (defined($host->{'retry_check_interval'})) { push @{$clapi{$type}}, $type.";setparam;".$prefix.$host->{'host_name'}.";retry_check_interval;".$host->{'retry_check_interval'} };
             if (defined($host->{'check_freshness'})) { push @{$clapi{$type}}, $type.";setparam;".$prefix.$host->{'host_name'}.";check_freshness;".$host->{'check_freshness'} };
             if (defined($host->{'freshness_threshold'})) { push @{$clapi{$type}}, $type.";setparam;".$prefix.$host->{'host_name'}.";freshness_threshold;".$host->{'freshness_threshold'} };
             if (defined($host->{'check_period'})) { push @{$clapi{$type}}, $type.";setparam;".$prefix.$host->{'host_name'}.";check_period;".((ref $host->{'check_period'} eq "Nagios::TimePeriod") ? $OPTION{'prefix'}.${$host->{'check_period'}}{'timeperiod_name'} : $OPTION{'prefix'}.$host->{'check_period'}) };
@@ -322,7 +324,6 @@ sub export_hosts {
             if (defined($host->{'process_perf_data'})) { push @{$clapi{$type}}, $type.";setparam;".$prefix.$host->{'host_name'}.";process_perf_data;".$host->{'process_perf_data'} };
             if (defined($host->{'retain_nonstatus_information'})) { push @{$clapi{$type}}, $type.";setparam;".$prefix.$host->{'host_name'}.";retain_nonstatus_information;".$host->{'retain_nonstatus_information'} };
             if (defined($host->{'retain_status_information'})) { push @{$clapi{$type}}, $type.";setparam;".$prefix.$host->{'host_name'}.";retain_status_information;".$host->{'retain_status_information'} };
-            if (defined($host->{'retry_interval'})) { push @{$clapi{$type}}, $type.";setparam;".$prefix.$host->{'host_name'}.";retry_check_interval;".$host->{'retry_interval'} };
             if (defined($host->{'stalking_options'})) { push @{$clapi{$type}}, $type.";setparam;".$prefix.$host->{'host_name'}.";stalking_options;".((ref $host->{'stalking_options'} eq "ARRAY") ? join(",", @{$host->{'stalking_options'}}) : $host->{'stalking_options'}) };
             if (defined($host->{'event_handler'})) {
                 my ($handler_command, $handler_command_arguments) = split('!', $host->{'event_handler'}, 2);
@@ -363,7 +364,7 @@ sub export_hosts {
             
             # Macros handling
             foreach my $macro ($host->list_attributes()) {
-                if ($macro =~ m/^_/ && $macro !~ m/SNMP|HOST_ID/ && defined($host->{$macro})) {
+                if ($macro =~ m/^_/ && $macro !~ m/_SNMPVERSION|_SNMPCOMMUNITY|HOST_ID/ && defined($host->{$macro})) {
                     $macro =~ s/_//;
                     push @{$clapi{$type}}, $type.";setmacro;".$prefix.$host->{'host_name'}.";".$macro.";".$host->{"_".$macro}.";0;";
                 }
@@ -492,6 +493,7 @@ sub export_services {
             if (defined($service->{'check_interval'})) { push @{$clapi{STPL}}, "STPL;setparam;".$OPTION{'prefix'}.$service->{'name'}.";normal_check_interval;".$service->{'check_interval'} };
             if (defined($service->{'normal_check_interval'})) { push @{$clapi{STPL}}, "STPL;setparam;".$OPTION{'prefix'}.$service->{'name'}.";normal_check_interval;".$service->{'normal_check_interval'} };
             if (defined($service->{'retry_interval'})) { push @{$clapi{STPL}}, "STPL;setparam;".$OPTION{'prefix'}.$service->{'name'}.";retry_check_interval;".$service->{'retry_interval'} };
+            if (defined($service->{'retry_check_interval'})) { push @{$clapi{STPL}}, "STPL;setparam;".$OPTION{'prefix'}.$service->{'name'}.";retry_check_interval;".$service->{'retry_check_interval'} };
             if (defined($service->{'active_checks_enabled'})) { push @{$clapi{STPL}}, "STPL;setparam;".$OPTION{'prefix'}.$service->{'name'}.";active_checks_enabled;".$service->{'active_checks_enabled'} };
             if (defined($service->{'passive_checks_enabled'})) { push @{$clapi{STPL}}, "STPL;setparam;".$OPTION{'prefix'}.$service->{'name'}.";passive_checks_enabled;".$service->{'passive_checks_enabled'} };
             if (defined($service->{'notifications_enabled'})) { push @{$clapi{STPL}}, "STPL;setparam;".$OPTION{'prefix'}.$service->{'name'}.";notifications_enabled;".$service->{'notifications_enabled'} };
@@ -578,6 +580,7 @@ sub export_services {
                 if (defined($service->{'check_interval'})) { push @{$clapi{SERVICE}}, "SERVICE;setparam;".$host.";".$service->{'service_description'}.";normal_check_interval;".$service->{'check_interval'} };
                 if (defined($service->{'normal_check_interval'})) { push @{$clapi{SERVICE}}, "SERVICE;setparam;".$host.";".$service->{'service_description'}.";normal_check_interval;".$service->{'normal_check_interval'} };
                 if (defined($service->{'retry_interval'})) { push @{$clapi{SERVICE}}, "SERVICE;setparam;".$host.";".$service->{'service_description'}.";retry_check_interval;".$service->{'retry_interval'} };
+                if (defined($service->{'retry_check_interval'})) { push @{$clapi{SERVICE}}, "SERVICE;setparam;".$host.";".$service->{'service_description'}.";retry_check_interval;".$service->{'retry_check_interval'} };
                 if (defined($service->{'active_checks_enabled'})) { push @{$clapi{SERVICE}}, "SERVICE;setparam;".$host.";".$service->{'service_description'}.";active_checks_enabled;".$service->{'active_checks_enabled'} };
                 if (defined($service->{'passive_checks_enabled'})) { push @{$clapi{SERVICE}}, "SERVICE;setparam;".$host.";".$service->{'service_description'}.";passive_checks_enabled;".$service->{'passive_checks_enabled'} };
                 if (defined($service->{'notifications_enabled'})) { push @{$clapi{SERVICE}}, "SERVICE;setparam;".$host.";".$service->{'service_description'}.";notifications_enabled;".$service->{'notifications_enabled'} };
