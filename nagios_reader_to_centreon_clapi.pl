@@ -474,8 +474,8 @@ sub export_services {
                 $default_stpl = "";
             }
 
-            if (defined($service->{'name'})) { push @{$clapi{STPL}}, "STPL;ADD;".$OPTION{'prefix'}.$service->{'name'}.";".$service->{'service_description'}.";".(defined($service->{'use'}) ? $OPTION{'prefix'}.$service->{'use'} : $default_stpl) };
-            if (defined($service->{'is_volatile'})) { push @{$clapi{STPL}}, "STPL;setparam;".$OPTION{'prefix'}.$service->{'name'}.";is_volatile;".$service->{'is_volatile'} };
+            if (defined($service->{'name'})) { push @{$clapi{STPL}}, "STPL;ADD;".$OPTION{'prefix'}.$service->{'name'}.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $service->{'name'}).";".(defined($service->{'use'}) ? $OPTION{'prefix'}.$service->{'use'} : $default_stpl) };
+	    if (defined($service->{'is_volatile'})) { push @{$clapi{STPL}}, "STPL;setparam;".$OPTION{'prefix'}.$service->{'name'}.";is_volatile;".$service->{'is_volatile'} };
             if (defined($service->{'check_period'})) { push @{$clapi{STPL}}, "STPL;setparam;".$OPTION{'prefix'}.$service->{'name'}.";check_period;".((ref $service->{'check_period'} eq "Nagios::TimePeriod") ? $OPTION{'prefix'}.${$service->{'check_period'}}{'timeperiod_name'} : $OPTION{'prefix'}.$service->{'check_period'}) };
             if (defined($service->{'check_command'})) {
                 my ($check_command, $check_command_arguments) = split('!', (ref $service->{'check_command'} eq "Nagios::Command") ? ${$service->{'check_command'}}{'command_name'} : $service->{'check_command'}, 2);
