@@ -658,42 +658,168 @@ sub export_services {
         if (defined($service->{'hostgroup_name'})) {
             if (ref $service->{'hostgroup_name'}) {
                 foreach my $hostgroup (@{$service->{'hostgroup_name'}}) {
-                    $hostgroup = $objects->find_object($hostgroup, "Nagios::HostGroup");
-                    next if (ref $hostgroup ne "Nagios::HostGroup");
-                    if (defined($hostgroup->{'members'})) {
-                        if (ref $hostgroup->{'members'}) {
-                            foreach my $host (@{$hostgroup->{'members'}}) {
-                                push @{$clapi{SERVICE}}, "SERVICE;ADD;".$host.";".$service->{'service_description'}.";".$OPTION{'prefix'}.$service->{'name'};
-                            }
-                        } else {
-                            push @{$clapi{SERVICE}}, "SERVICE;ADD;".$hostgroup->{'members'}.";".$service->{'service_description'}.";".$OPTION{'prefix'}.$service->{'name'};
-                        }
-                    }
-                    # Loop to add hosts from host definition
-                    if (defined($hostgroup->{'hostgroup_name'}) && defined($hostgroups{$hostgroup->{'hostgroup_name'}})) {
-                        foreach my $host (@{$hostgroups{$hostgroup->{'hostgroup_name'}}}) {
-                            push @{$clapi{SERVICE}}, "SERVICE;ADD;".$host.";".$service->{'service_description'}.";".$OPTION{'prefix'}.$service->{'name'};
-                        }
-                    }
+		    push @{$clapi{HGSERVICE}}, "HGSERVICE;ADD;".$OPTION{'prefix'}.$hostgroup.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $hostgroup).";".(defined($service->{'use'}) ? $OPTION{'prefix'}.$service->{'use'} : $default_stpl);
+        	    if (defined($service->{'is_volatile'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$hostgroup.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $hostgroup).";is_volatile;".$service->{'is_volatile'} };
+        	    if (defined($service->{'check_period'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$hostgroup.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $hostgroup).";check_period;".$service->{'check_period'} };
+        	    if (defined($service->{'check_command'})) {
+            		my ($check_command, $check_command_arguments) = split('!', (ref $service->{'check_command'} eq "Nagios::Command") ? ${$service->{'check_command'}}{'command_name'} : $service->{'check_command'}, 2);
+            		if (defined($check_command) && $check_command ne "") { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$hostgroup.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $hostgroup).";check_command;".$OPTION{'prefix'}.$check_command };
+            		if (defined($check_command_arguments) && $check_command_arguments ne "") {
+                	    if ($OPTION{'prefix'} ne "") {
+                    	        foreach my $macro (keys %resource_macros) {
+                    		    $check_command_arguments =~  s/\$$macro\$/\$$OPTION{'prefix'}$macro\$/g;
+                    		}
+                	    }
+                	    push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$hostgroup.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $hostgroup)."check_command_arguments;".$OPTION{'prefix'}."!".$check_command_arguments
+            		}
+        	    }
+        	    if (defined($service->{'max_check_attempts'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$hostgroup.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $hostgroup).";max_check_attempts;".$service->{'max_check_attempts'} };
+        	    if (defined($service->{'check_interval'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$hostgroup.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $hostgroup).";normal_check_interval;".$service->{'check_interval'} };
+        	    if (defined($service->{'normal_check_interval'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$hostgroup.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $hostgroup).";normal_check_interval;".$service->{'normal_check_interval'} };
+        	    if (defined($service->{'retry_interval'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$hostgroup.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $hostgroup).";retry_check_interval;".$service->{'retry_interval'} };
+        	    if (defined($service->{'retry_check_interval'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$hostgroup.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $hostgroup).";retry_check_interval;".$service->{'retry_check_interval'} };
+        	    if (defined($service->{'active_checks_enabled'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$hostgroup.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $hostgroup).";active_checks_enabled;".$service->{'active_checks_enabled'} };
+        	    if (defined($service->{'passive_checks_enabled'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$hostgroup.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $hostgroup).";passive_checks_enabled;".$service->{'passive_checks_enabled'} };
+        	    if (defined($service->{'notifications_enabled'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$hostgroup.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $hostgroup).";notifications_enabled;".$service->{'notifications_enabled'} };
+        	    if (defined($service->{'notification_interval'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$hostgroup.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $hostgroup).";notification_interval;".$service->{'notification_interval'} };
+        	    if (defined($service->{'notification_period'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$hostgroup.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $hostgroup).";notification_period;".((ref $service->{'notification_period'} eq "Nagios::TimePeriod") ? $OPTION{'prefix'}.${$service->{'notification_period'}}{'timeperiod_name'} : $OPTION{'prefix'}.$service->{'notification_period'}) };
+        	    if (defined($service->{'notification_options'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$hostgroup.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $hostgroup).";notification_options;".((ref $service->{'notification_options'}  eq "ARRAY") ? join(",", @{$service->{'notification_options'}}) : $service->{'notification_options'}) };
+        	    if (defined($service->{'first_notification_delay'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$hostgroup.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $hostgroup).";first_notification_delay;".$service->{'first_notification_delay'} };
+        	    if (defined($service->{'parallelize_check'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$hostgroup.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $hostgroup).";parallelize_check;".$service->{'parallelize_check'} };
+        	    if (defined($service->{'obsess_over_service'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$hostgroup.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $hostgroup).";obsess_over_service;".$service->{'obsess_over_service'} };
+        	    if (defined($service->{'check_freshness'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$hostgroup.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $hostgroup).";check_freshness;".$service->{'check_freshness'} };
+        	    if (defined($service->{'freshness_threshold'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$hostgroup.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $hostgroup).";freshness_threshold;".$service->{'freshness_threshold'} };
+        	    if (defined($service->{'flap_detection_enabled'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$hostgroup.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $hostgroup).";flap_detection_enabled;".$service->{'flap_detection_enabled'} };
+        	    if (defined($service->{'low_flap_threshold'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$hostgroup.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $hostgroup).";low_flap_threshold;".$service->{'low_flap_threshold'} };
+        	    if (defined($service->{'high_flap_threshold'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$hostgroup.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $hostgroup).";high_flap_threshold;".$service->{'high_flap_threshold'} };
+        	    if (defined($service->{'process_perf_data'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$hostgroup.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $hostgroup).";process_perf_data;".$service->{'process_perf_data'} };
+        	    if (defined($service->{'retain_status_information'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$hostgroup.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $hostgroup).";retain_status_information;".$service->{'retain_status_information'} };
+        	    if (defined($service->{'retain_nonstatus_information'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$hostgroup.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $hostgroup).";retain_nonstatus_information;".$service->{'retain_nonstatus_information'} };
+        	    if (defined($service->{'stalking_options'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$hostgroup.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $hostgroup).";stalking_options;".((ref $service->{'stalking_options'}  eq "ARRAY") ? join(",", @{$service->{'stalking_options'}}) : $service->{'stalking_options'}) };
+        	    if (defined($service->{'failure_prediction_enabled'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$hostgroup.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $hostgroup).";failure_prediction_enabled;".$service->{'failure_prediction_enabled'} };
+        	    if (defined($service->{'event_handler'})) {
+            		my ($handler_command, $handler_command_arguments) = split('!', (ref $service->{'event_handler'} eq "Nagios::Command") ? ${$service->{'event_handler'}}{'command_name'} : $service->{'event_handler'}, 2);
+            		if (defined($handler_command) && $handler_command ne "") { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$hostgroup.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $hostgroup).";event_handler;".$OPTION{'prefix'}.$handler_command };
+            		if (defined($handler_command_arguments) && $handler_command_arguments ne "") {
+                	    if ($OPTION{'prefix'} ne "") {
+                    		foreach my $macro (keys %resource_macros) {
+                        	    $handler_command_arguments =~  s/\$$macro\$/\$$OPTION{'prefix'}$macro\$/g;
+                    		}
+                	    }
+                	    push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$hostgroup.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $hostgroup).";event_handler_arguments;!".$handler_command_arguments
+            		}
+        	    }
+        	    if (defined($service->{'event_handler_enabled'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$hostgroup.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $hostgroup).";event_handler_enabled;".$service->{'event_handler_enabled'} };
+        	    if (defined($service->{'notes'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$hostgroup.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $hostgroup).";notes;".$service->{'notes'} };
+        	    if (defined($service->{'notes_url'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$hostgroup.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $hostgroup).";notes_url;".$service->{'notes_url'} };
+        	    if (defined($service->{'action_url'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$hostgroup.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $hostgroup).";action_url;".$service->{'action_url'} };
+        	    if (defined($service->{'comment'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$hostgroup.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $hostgroup).";comment;".$service->{'comment'} };
+        	    if (defined($service->{'icon_image'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$hostgroup.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $hostgroup).";icon_image;".$service->{'icon_image'} };
+        	    if (defined($service->{'icon_image_alt'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$hostgroup.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $hostgroup).";icon_image_alt;".$service->{'icon_image_alt'} };
+        	    if (defined($service->{'recovery_notification_delay'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$hostgroup.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $hostgroup).";recovery_notification_delay;".$service->{'recovery_notification_delay'} };
+
+        	    # Custom macros handling
+        	    foreach my $macro ($service->list_attributes()) {
+            		if ($macro =~ m/^_/ && $macro !~ m/SERVICE_ID/ && defined($service->{$macro})) {
+                	    $macro =~ s/_//;
+                	    push @{$clapi{HGSERVICE}}, "HGSERVICE;setmacro;".$OPTION{'prefix'}.$hostgroup.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $hostgroup).";".$macro.";".$service->{"_".$macro}.";0;";
+            		}
+        	    }
+
+        	    # Add contactgroups to service
+        	    if (defined($service->{'contact_groups'})) {
+            		if (ref $service->{'contact_groups'}) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setcontactgroup;".$OPTION{'prefix'}.$hostgroup.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $hostgroup).";".(join("|", (my @contactgroups = map { (ref $_ ne "Nagios::ContactGroup") ? $OPTION{'prefix'}.$_ : $OPTION{'prefix'}.$_->{'contactgroup_name'} } @{$service->{'contact_groups'}}))) };
+            		if (not ref $service->{'contact_groups'}) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setcontactgroup;".$OPTION{'prefix'}.$hostgroup.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $hostgroup).";".$OPTION{'prefix'}.$service->{'contact_groups'} };
+        	    }
+
+        	    # Add contacts to service
+        	    if (defined($service->{'contacts'})) {
+            		if (ref $service->{'contacts'}) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setcontact;".$OPTION{'prefix'}.$hostgroup.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $hostgroup).";".(join("|", (my @contactgroups = map { (ref $_ ne "Nagios::Contact") ? $OPTION{'prefix'}.$_ : $OPTION{'prefix'}.$_->{'contact_name'} } @{$service->{'contacts'}}))) };
+            		if (not ref $service->{'contacts'}) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setcontact;".$OPTION{'prefix'}.$hostgroup.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $hostgroup).";".$OPTION{'prefix'}.$service->{'contacts'} };
+        	    }
+
                 }
             } else {
-                my $hostgroup = $objects->find_object($service->{'hostgroup_name'}, "Nagios::HostGroup");
-                next if (ref $hostgroup ne "Nagios::HostGroup");
-                if (defined($hostgroup->{'members'})) {
-                    if (ref $hostgroup->{'members'}) {
-                        foreach my $host (@{$hostgroup->{'members'}}) {
-                            push @{$clapi{SERVICE}}, "SERVICE;ADD;".$host.";".$service->{'service_description'}.";".$OPTION{'prefix'}.$service->{'name'};
-                        }
-                    } else {
-                        push @{$clapi{SERVICE}}, "SERVICE;ADD;".$hostgroup->{'members'}.";".$service->{'service_description'}.";".$OPTION{'prefix'}.$service->{'name'};
-                    }
-                }
-                # Loop to add hosts from host definition
-                if (defined($hostgroup->{'hostgroup_name'}) && defined($hostgroups{$hostgroup->{'hostgroup_name'}})) {
-                    foreach my $host (@{$hostgroups{$hostgroup->{'hostgroup_name'}}}) {
-                        push @{$clapi{SERVICE}}, "SERVICE;ADD;".$host.";".$service->{'service_description'}.";".$OPTION{'prefix'}.$service->{'name'};
-                    }
-                }
+	        push @{$clapi{HGSERVICE}}, "HGSERVICE;ADD;".$OPTION{'prefix'}.$service->{'hostgroup_name'}.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $service->{'hostgroup_name'}).";".(defined($service->{'use'}) ? $OPTION{'prefix'}.$service->{'use'} : $default_stpl);
+
+        	if (defined($service->{'is_volatile'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$service->{'hostgroup_name'}.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $service->{'hostgroup_name'}).";is_volatile;".$service->{'is_volatile'} };
+        	if (defined($service->{'check_period'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$service->{'hostgroup_name'}.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $service->{'hostgroup_name'}).";check_period;".$service->{'check_period'} };
+        	if (defined($service->{'check_command'})) {
+            	    my ($check_command, $check_command_arguments) = split('!', (ref $service->{'check_command'} eq "Nagios::Command") ? ${$service->{'check_command'}}{'command_name'} : $service->{'check_command'}, 2);
+            	    if (defined($check_command) && $check_command ne "") { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$service->{'hostgroup_name'}.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $service->{'hostgroup_name'}).";check_command;".$OPTION{'prefix'}.$check_command };
+            	    if (defined($check_command_arguments) && $check_command_arguments ne "") {
+                	if ($OPTION{'prefix'} ne "") {
+                    	    foreach my $macro (keys %resource_macros) {
+                        	$check_command_arguments =~  s/\$$macro\$/\$$OPTION{'prefix'}$macro\$/g;
+                    	    }
+                	}
+        		push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$service->{'hostgroup_name'}.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $service->{'hostgroup_name'}).";check_command_arguments;".$OPTION{'prefix'}."!".$check_command_arguments
+            	    }
+        	}
+        	if (defined($service->{'max_check_attempts'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$service->{'hostgroup_name'}.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $service->{'hostgroup_name'}).";max_check_attempts;".$service->{'max_check_attempts'} };
+        	if (defined($service->{'check_interval'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$service->{'hostgroup_name'}.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $service->{'hostgroup_name'}).";normal_check_interval;".$service->{'check_interval'} };
+        	if (defined($service->{'normal_check_interval'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$service->{'hostgroup_name'}.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $service->{'hostgroup_name'}).";normal_check_interval;".$service->{'normal_check_interval'} };
+        	if (defined($service->{'retry_interval'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$service->{'hostgroup_name'}.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $service->{'hostgroup_name'}).";retry_check_interval;".$service->{'retry_interval'} };
+        	if (defined($service->{'retry_check_interval'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$service->{'hostgroup_name'}.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $service->{'hostgroup_name'}).";retry_check_interval;".$service->{'retry_check_interval'} };
+        	if (defined($service->{'active_checks_enabled'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$service->{'hostgroup_name'}.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $service->{'hostgroup_name'}).";active_checks_enabled;".$service->{'active_checks_enabled'} };
+        	if (defined($service->{'passive_checks_enabled'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$service->{'hostgroup_name'}.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $service->{'hostgroup_name'}).";passive_checks_enabled;".$service->{'passive_checks_enabled'} };
+        	if (defined($service->{'notifications_enabled'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$service->{'hostgroup_name'}.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $service->{'hostgroup_name'}).";notifications_enabled;".$service->{'notifications_enabled'} };
+        	if (defined($service->{'notification_interval'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$service->{'hostgroup_name'}.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $service->{'hostgroup_name'}).";notification_interval;".$service->{'notification_interval'} };
+        	if (defined($service->{'notification_period'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$service->{'hostgroup_name'}.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $service->{'hostgroup_name'}).";notification_period;".((ref $service->{'notification_period'} eq "Nagios::TimePeriod") ? $OPTION{'prefix'}.${$service->{'notification_period'}}{'timeperiod_name'} : $OPTION{'prefix'}.$service->{'notification_period'}) };
+        	if (defined($service->{'notification_options'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$service->{'hostgroup_name'}.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $service->{'hostgroup_name'}).";notification_options;".((ref $service->{'notification_options'}  eq "ARRAY") ? join(",", @{$service->{'notification_options'}}) : $service->{'notification_options'}) };
+        	if (defined($service->{'first_notification_delay'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$service->{'hostgroup_name'}.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $service->{'hostgroup_name'}).";first_notification_delay;".$service->{'first_notification_delay'} };
+        	if (defined($service->{'parallelize_check'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$service->{'hostgroup_name'}.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $service->{'hostgroup_name'}).";parallelize_check;".$service->{'parallelize_check'} };
+        	if (defined($service->{'obsess_over_service'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$service->{'hostgroup_name'}.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $service->{'hostgroup_name'}).";obsess_over_service;".$service->{'obsess_over_service'} };
+        	if (defined($service->{'check_freshness'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$service->{'hostgroup_name'}.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $service->{'hostgroup_name'}).";check_freshness;".$service->{'check_freshness'} };
+        	if (defined($service->{'freshness_threshold'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$service->{'hostgroup_name'}.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $service->{'hostgroup_name'}).";freshness_threshold;".$service->{'freshness_threshold'} };
+        	if (defined($service->{'flap_detection_enabled'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$service->{'hostgroup_name'}.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $service->{'hostgroup_name'}).";flap_detection_enabled;".$service->{'flap_detection_enabled'} };
+        	if (defined($service->{'low_flap_threshold'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$service->{'hostgroup_name'}.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $service->{'hostgroup_name'}).";low_flap_threshold;".$service->{'low_flap_threshold'} };
+        	if (defined($service->{'high_flap_threshold'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$service->{'hostgroup_name'}.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $service->{'hostgroup_name'}).";high_flap_threshold;".$service->{'high_flap_threshold'} };
+        	if (defined($service->{'process_perf_data'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$service->{'hostgroup_name'}.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $service->{'hostgroup_name'}).";process_perf_data;".$service->{'process_perf_data'} };
+    		if (defined($service->{'retain_status_information'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$service->{'hostgroup_name'}.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $service->{'hostgroup_name'}).";retain_status_information;".$service->{'retain_status_information'} };
+        	if (defined($service->{'retain_nonstatus_information'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$service->{'hostgroup_name'}.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $service->{'hostgroup_name'}).";retain_nonstatus_information;".$service->{'retain_nonstatus_information'} };
+        	if (defined($service->{'stalking_options'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$service->{'hostgroup_name'}.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $service->{'hostgroup_name'}).";stalking_options;".((ref $service->{'stalking_options'}  eq "ARRAY") ? join(",", @{$service->{'stalking_options'}}) : $service->{'stalking_options'}) };
+        	if (defined($service->{'failure_prediction_enabled'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$service->{'hostgroup_name'}.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $service->{'hostgroup_name'}).";failure_prediction_enabled;".$service->{'failure_prediction_enabled'} };
+        	if (defined($service->{'event_handler'})) {
+            	    my ($handler_command, $handler_command_arguments) = split('!', (ref $service->{'event_handler'} eq "Nagios::Command") ? ${$service->{'event_handler'}}{'command_name'} : $service->{'event_handler'}, 2);
+            	    if (defined($handler_command) && $handler_command ne "") { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$service->{'hostgroup_name'}.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $service->{'hostgroup_name'}).";event_handler;".$OPTION{'prefix'}.$handler_command };
+            	    if (defined($handler_command_arguments) && $handler_command_arguments ne "") {
+                	if ($OPTION{'prefix'} ne "") {
+                    	    foreach my $macro (keys %resource_macros) {
+                        	$handler_command_arguments =~  s/\$$macro\$/\$$OPTION{'prefix'}$macro\$/g;
+                    	    }
+                	}
+                	push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$service->{'hostgroup_name'}.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $service->{'hostgroup_name'}).";event_handler_arguments;!".$handler_command_arguments
+            	    }
+        	}
+        	if (defined($service->{'event_handler_enabled'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$service->{'hostgroup_name'}.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $service->{'hostgroup_name'}).";event_handler_enabled;".$service->{'event_handler_enabled'} };
+        	if (defined($service->{'notes'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$service->{'hostgroup_name'}.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $service->{'hostgroup_name'}).";notes;".$service->{'notes'} };
+        	if (defined($service->{'notes_url'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$service->{'hostgroup_name'}.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $service->{'hostgroup_name'}).";notes_url;".$service->{'notes_url'} };
+        	if (defined($service->{'action_url'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$service->{'hostgroup_name'}.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $service->{'hostgroup_name'}).";action_url;".$service->{'action_url'} };
+        	if (defined($service->{'comment'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$service->{'hostgroup_name'}.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $service->{'hostgroup_name'}).";comment;".$service->{'comment'} };
+        	if (defined($service->{'icon_image'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$service->{'hostgroup_name'}.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $service->{'hostgroup_name'}).";icon_image;".$service->{'icon_image'} };
+        	if (defined($service->{'icon_image_alt'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$service->{'hostgroup_name'}.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $service->{'hostgroup_name'}).";icon_image_alt;".$service->{'icon_image_alt'} };
+        	if (defined($service->{'recovery_notification_delay'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$service->{'hostgroup_name'}.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $service->{'hostgroup_name'}).";recovery_notification_delay;".$service->{'recovery_notification_delay'} };
+
+        	# Custom macros handling
+        	foreach my $macro ($service->list_attributes()) {
+            	    if ($macro =~ m/^_/ && $macro !~ m/SERVICE_ID/ && defined($service->{$macro})) {
+                	$macro =~ s/_//;
+                	push @{$clapi{HGSERVICE}}, "HGSERVICE;setmacro;".$OPTION{'prefix'}.$service->{'hostgroup_name'}.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $service->{'hostgroup_name'}).";".$macro.";".$service->{"_".$macro}.";0;";
+            	    }
+        	}
+
+        	# Add contactgroups to service
+        	if (defined($service->{'contact_groups'})) {
+            	    if (ref $service->{'contact_groups'}) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setcontactgroup;".$OPTION{'prefix'}.$service->{'hostgroup_name'}.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $service->{'hostgroup_name'}).";".(join("|", (my @contactgroups = map { (ref $_ ne "Nagios::ContactGroup") ? $OPTION{'prefix'}.$_ : $OPTION{'prefix'}.$_->{'contactgroup_name'} } @{$service->{'contact_groups'}}))) };
+            	    if (not ref $service->{'contact_groups'}) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setcontactgroup;".$OPTION{'prefix'}.$service->{'hostgroup_name'}.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $service->{'hostgroup_name'}).";".$OPTION{'prefix'}.$service->{'contact_groups'} };
+        	}
+
+        	# Add contacts to service
+        	if (defined($service->{'contacts'})) {
+            	    if (ref $service->{'contacts'}) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setcontact;".$OPTION{'prefix'}.$service->{'hostgroup_name'}.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $service->{'hostgroup_name'}).";".(join("|", (my @contactgroups = map { (ref $_ ne "Nagios::Contact") ? $OPTION{'prefix'}.$_ : $OPTION{'prefix'}.$_->{'contact_name'} } @{$service->{'contacts'}}))) };
+            	    if (not ref $service->{'contacts'}) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setcontact;".$OPTION{'prefix'}.$service->{'hostgroup_name'}.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $service->{'hostgroup_name'}).";".$OPTION{'prefix'}.$service->{'contacts'} };
+        	}
             }
         }
     }
@@ -774,5 +900,6 @@ foreach (@{$clapi{STPL}}) { print $_, "\n" if ! $multi{$_}++ };
 foreach (@{$clapi{SERVICE}}) { print $_, "\n" if ! $multi{$_}++ };
 foreach (@{$clapi{SG}}) { print $_, "\n" if ! $multi{$_}++ };
 foreach (@{$clapi{CONTACT_SWITCH}}) { print $_, "\n" if ! $multi{$_}++ };
+foreach (@{$clapi{HGSERVICE}}) { print $_, "\n" if ! $multi{$_}++ };
 
 exit 0;
