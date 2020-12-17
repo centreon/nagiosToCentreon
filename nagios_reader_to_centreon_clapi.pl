@@ -670,7 +670,7 @@ sub export_services {
                     		    $check_command_arguments =~  s/\$$macro\$/\$$OPTION{'prefix'}$macro\$/g;
                     		}
                 	    }
-                	    push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$hostgroup.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $hostgroup)."check_command_arguments;".$OPTION{'prefix'}."!".$check_command_arguments
+                	    push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$hostgroup.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $hostgroup).";check_command_arguments;".$OPTION{'prefix'}."!".$check_command_arguments
             		}
         	    }
         	    if (defined($service->{'max_check_attempts'})) { push @{$clapi{HGSERVICE}}, "HGSERVICE;setparam;".$OPTION{'prefix'}.$hostgroup.";".(defined($service->{'service_description'}) ? $service->{'service_description'} : $hostgroup).";max_check_attempts;".$service->{'max_check_attempts'} };
